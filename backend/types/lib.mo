@@ -1,3 +1,4 @@
+import Principal "mo:base/Principal";
 module {
     public type UserId = Principal;
     public type ProjectId = Text;
@@ -37,6 +38,7 @@ module {
         id : UserId;
         username : Text;
         email : Text;
+        principal : Principal;
         created_at : Int;
         updated_at : Int;
         subscription_tier : SubscriptionTier;
@@ -84,7 +86,7 @@ module {
 
     public type StreamingStrategy = {
         #Callback : {
-            callback : query (StreamingCallbackToken) -> async (StreamingCallbackResponse);
+            callback : shared (StreamingCallbackToken) -> async (StreamingCallbackResponse);
             token : StreamingCallbackToken;
         };
     };

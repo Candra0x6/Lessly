@@ -1,16 +1,15 @@
-import Types "Types";
 import HashMap "mo:base/HashMap";
 import Text "mo:base/Text";
 import Blob "mo:base/Blob";
 import Array "mo:base/Array";
-import Principal "mo:base/Principal";
-import Nat "mo:base/Nat";
-import Nat16 "mo:base/Nat16";
 import Time "mo:base/Time";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
-import Buffer "mo:base/Buffer";
+import Types "../../types/lib";
+import storageCanister "canister:website_storage";
+import projectCanister "canister:project_management";
 
+/// WebsiteRenderer canister handles HTTP requests and renders website content from assets
 actor WebsiteRenderer {
   type HttpRequest = Types.HttpRequest;
   type HttpResponse = Types.HttpResponse;
@@ -20,26 +19,18 @@ actor WebsiteRenderer {
   type StreamingCallbackToken = Types.StreamingCallbackToken;
   type StreamingCallbackResponse = Types.StreamingCallbackResponse;
   type RenderError = Types.RenderError;
-  
+
   // Reference to the WebsiteStorage canister
-  private let storageCanister : actor {
-    getAssetMetadata : (AssetId) -> async Result.Result<Types.Asset, Types.AssetError>;
-    getAssetChunk : (AssetId, Nat) -> async Result.Result<Blob, Types.AssetError>;
-    getProjectAssets : (ProjectId) -> async [Types.Asset];
-  } = actor("website-storage-canister-id");
-  
+
   // Reference to the ProjectManagement canister
-  private let projectCanister : actor {
-    getProject : (ProjectId) -> async Result.Result<Types.Project, Types.ProjectError>;
-  } = actor("project-management-canister-id");
-  
+
   // Cache for domain mappings
   private stable var domainEntries : [(Text, Domain)] = [];
   private var domains = HashMap.HashMap<Text, Domain>(0, Text.equal, Text.hash);
-  
+
   // Cache for content type mappings
   private let contentTypes = HashMap.HashMap<Text, Text>(10, Text.equal, Text.hash);
-  
+
   // Initialize common content types
   private func initContentTypes() {
     contentTypes.put("html", "text/html; charset=UTF-8");
@@ -55,20 +46,21 @@ actor WebsiteRenderer {
     contentTypes.put("woff2", "font/woff2");
     contentTypes.put("ttf", "font/ttf");
   };
-  
+
   // System upgrade hooks for orthogonal persistence
   system func preupgrade() {
     domainEntries := Iter.toArray(domains.entries());
   };
-  
+
   system func postupgrade() {
     domains := HashMap.fromIter<Text, Domain>(domainEntries.vals(), 0, Text.equal, Text.hash);
     domainEntries := [];
     initContentTypes();
   };
-  
-  // Link a custom domain to a project
-  public shared(msg) func linkDomain(domain_name: Text, project_id: ProjectId) : async Result.Result<Domain, Text> {
+
+  /// Link a custom domain to a project
+  /// Returns the domain configuration or an error message
+  public shared (msg) func linkDomain(domain_name : Text, project_id : ProjectId) : async Result.Result<Domain, Text> {
     // Check if domain already exists
     switch (domains.get(domain_name)) {
       case (?existing) {
@@ -78,19 +70,19 @@ actor WebsiteRenderer {
         // Verify the project exists and caller has access
         try {
           let projectResult = await projectCanister.getProject(project_id);
-          
+
           switch (projectResult) {
             case (#ok(project)) {
               if (project.owner != msg.caller) {
                 return #err("Only the project owner can link domains");
               };
-              
+
               let domain : Domain = {
                 name = domain_name;
                 project_id = project_id;
                 created_at = Time.now();
               };
-              
+
               domains.put(domain_name, domain);
               return #ok(domain);
             };
@@ -104,9 +96,10 @@ actor WebsiteRenderer {
       };
     };
   };
-  
-  // Get the project ID from a URL
-  private func getProjectIdFromUrl(url: Text) : ?ProjectId {
+
+  /// Get the project ID from a URL
+  /// Returns the project ID if found in the URL
+  private func getProjectIdFromUrl(url : Text) : ?ProjectId {
     // Extract domain or subdomain from URL
     let parts = Text.split(url, #text("/"));
     let host = switch (Iter.toArray(parts)[0]) {
@@ -120,7 +113,7 @@ actor WebsiteRenderer {
         Iter.toArray(parts)[0];
       };
     };
-    
+
     // Check if this is a custom domain
     switch (domains.get(host)) {
       case (?domain) {
@@ -130,7 +123,7 @@ actor WebsiteRenderer {
         // Check if this is a default *.ic0.app URL
         let hostParts = Text.split(host, #text("."));
         let parts = Iter.toArray(hostParts);
-        
+
         if (parts.size() >= 3 and parts[parts.size() - 2] == "ic0" and parts[parts.size() - 1] == "app") {
           ?parts[0];
         } else {
@@ -139,15 +132,16 @@ actor WebsiteRenderer {
       };
     };
   };
-  
-  // Get the asset path from a URL
-  private func getAssetPathFromUrl(url: Text) : Text {
+
+  /// Get the asset path from a URL
+  /// Returns a normalized asset path from the URL
+  private func getAssetPathFromUrl(url : Text) : Text {
     let parts = Text.split(url, #text("?"));
     let pathWithoutQuery = Iter.toArray(parts)[0];
-    
+
     let pathParts = Text.split(pathWithoutQuery, #text("/"));
     let pathArray = Iter.toArray(pathParts);
-    
+
     // Skip the first part (protocol or empty) and the host
     var path = "";
     for (i in Iter.range(3, pathArray.size() - 1)) {
@@ -155,7 +149,7 @@ actor WebsiteRenderer {
         path := path # "/" # pathArray[i];
       };
     };
-    
+
     if (path == "") {
       "/index.html";
     } else if (Text.endsWith(path, #text("/"))) {
@@ -166,33 +160,37 @@ actor WebsiteRenderer {
       path;
     };
   };
-  
-  // HTTP request handler
-  public query func http_request(request: HttpRequest) : async HttpResponse {
+
+  /// HTTP request handler - query function that can fetch data from other canisters
+  /// Returns an HTTP response for the requested URL
+  public func http_request(request : HttpRequest) : async HttpResponse {
     let url = request.url;
-    
+
     // Get project ID from URL
     switch (getProjectIdFromUrl(url)) {
       case (?project_id) {
         // Get the asset path
         let asset_path = getAssetPathFromUrl(url);
-        
+
         // Try to find the asset in the project
         try {
           let projectAssets = await storageCanister.getProjectAssets(project_id);
-          
+
           // Find the asset by path
-          let matchingAssets = Array.filter<Types.Asset>(projectAssets, func(asset) {
-            asset.path == asset_path;
-          });
-          
+          let matchingAssets = Array.filter<Types.Asset>(
+            projectAssets,
+            func(asset) {
+              asset.path == asset_path;
+            },
+          );
+
           if (matchingAssets.size() > 0) {
             let asset = matchingAssets[0];
-            
+
             // Check if we have this asset's first chunk
             try {
               let firstChunkResult = await storageCanister.getAssetChunk(asset.id, 0);
-              
+
               switch (firstChunkResult) {
                 case (#ok(chunk)) {
                   // Determine if we need streaming
@@ -203,12 +201,12 @@ actor WebsiteRenderer {
                       chunk_index = 1; // Next chunk
                       project_id = project_id;
                     };
-                    
+
                     return {
                       status_code = 200;
                       headers = [
                         ("Content-Type", asset.content_type),
-                        ("Cache-Control", "public, max-age=3600")
+                        ("Cache-Control", "public, max-age=3600"),
                       ];
                       body = chunk;
                       streaming_strategy = ?#Callback({
@@ -222,7 +220,7 @@ actor WebsiteRenderer {
                       status_code = 200;
                       headers = [
                         ("Content-Type", asset.content_type),
-                        ("Cache-Control", "public, max-age=3600")
+                        ("Cache-Control", "public, max-age=3600"),
                       ];
                       body = chunk;
                       streaming_strategy = null;
@@ -273,21 +271,22 @@ actor WebsiteRenderer {
       };
     };
   };
-  
-  // Streaming callback for large assets
-  public query func http_streaming_callback(token: StreamingCallbackToken) : async StreamingCallbackResponse {
+
+  /// Streaming callback for large assets
+  /// Returns the next chunk of data for large asset streaming
+  public func http_streaming_callback(token : StreamingCallbackToken) : async StreamingCallbackResponse {
     let asset_id = token.asset_id;
     let chunk_index = token.chunk_index;
-    
+
     try {
       let chunkResult = await storageCanister.getAssetChunk(asset_id, chunk_index);
-      
+
       switch (chunkResult) {
         case (#ok(chunk)) {
           // Try to get the next chunk to see if we need to continue streaming
           try {
             let nextChunkResult = await storageCanister.getAssetChunk(asset_id, chunk_index + 1);
-            
+
             switch (nextChunkResult) {
               case (#ok(_)) {
                 // More chunks available
@@ -331,4 +330,14 @@ actor WebsiteRenderer {
       };
     };
   };
-}
+
+  /// Get all domains linked to a project - query function that doesn't modify state
+  /// Returns an array of domain configurations for the specified project
+  public query func getProjectDomains(project_id : ProjectId) : async [Domain] {
+    let projectDomains = Array.filter<Domain>(
+      Iter.toArray(domains.vals()),
+      func(domain) { domain.project_id == project_id },
+    );
+    return projectDomains;
+  };
+};

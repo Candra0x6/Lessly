@@ -1,0 +1,31 @@
+
+/* file: custom-theme.css */
+.gjs-one-bg        { background:#1f2937 !important; } /* abu tua */
+.gjs-two-bg        { background:#374151 !important; }
+.gjs-three-bg      { background:#2563eb !important; } /* aksen biru */
+.gjs-one-color     { color:#f9fafb !important; }      /* teks terang */
+.gjs-two-color     { color:#d1d5db !important; }
+
+
+
+
+/* Dropdown menu */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  min-width: 180px;
+  z-index: 1000;
+  margin-top: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}

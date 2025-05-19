@@ -1,50 +1,57 @@
-# ICP Boilerplate
+# Lessly - Web3 Website Builder
 
-A comprehensive starter template for building applications on the Internet Computer Protocol (ICP).
+Lessly is a decentralized website building and hosting platform built on the Internet Computer Protocol (ICP). It allows users to create, manage, and publish websites with custom domains in a fully decentralized manner.
+
+## Architecture
+
+The platform is built using the Motoko programming language and is divided into four main canisters:
+
+- **UserManagement**: Handles user registration, authentication, and subscription management
+- **ProjectManagement**: Manages website projects and their versions
+- **WebsiteStorage**: Stores and manages website assets (HTML, CSS, JS, images, etc.)
+- **WebsiteRenderer**: Renders websites to visitors and handles HTTP requests
+
+## Documentation
+
+- [System Summary](docs/summary.md): Overview of the system architecture and components
+- [Canister Flow](docs/canister_flow.md): Detailed explanation of the interactions between canisters
 
 ## Features
 
-- React frontend with TypeScript
-- Motoko backend canister setup
-- Internet Identity authentication integration
-- TailwindCSS for styling
-- Vite for fast development
-- Pre-configured DFX settings
+- User registration and authentication
+- Project creation and management
+- Version control for websites
+- Chunked asset storage for large files
+- Custom domain support
+- Streaming of large assets
+- Subscription tiers (free/premium)
 
-## Quick Start
+## Getting Started
 
-The easiest way to get started is to use our CLI:
-
-```bash
-npx create-icp-app my-icp-project
-```
-
-This will create a new project based on this boilerplate, with all dependencies installed and ready to go.
-
-## Manual Setup
-
-If you prefer to set up manually:
-
-1. Clone this repository:
+1. Make sure you have the DFINITY SDK (dfx) installed:
    ```
-   git clone https://github.com/yourusername/icp-boiler-plate.git my-project
+   sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
    ```
 
-2. Navigate to the project directory:
+2. Start the local development environment:
    ```
-   cd my-project
-   ```
-
-3. Install dependencies:
-   ```
-   npm install
+   dfx start --background
    ```
 
-4. Start the development server:
+3. Deploy the canisters:
    ```
-   npm run dev
+   dfx deploy
    ```
 
-## CLI Tool
+4. Visit the local frontend:
+   ```
+   npm start
+   ```
 
-This repository includes a CLI tool to automate the creation of new projects based on this boilerplate. See the [CLI documentation](./cli/README.md) for more details.
+## Development
+
+This project uses the Motoko programming language, which is specifically designed for the Internet Computer. The canisters follow the actor model and leverage orthogonal persistence for state management.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

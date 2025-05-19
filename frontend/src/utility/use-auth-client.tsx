@@ -13,9 +13,9 @@ import React, {
 import { ActorSubclass, Identity } from "@dfinity/agent"; // Tambahan untuk memperjelas tipe actor
 import { Principal } from "@dfinity/principal";
 import toast from "react-hot-toast";
-import { canisterId, createActor } from "@declarations/authentication";
-import { _SERVICE, UserRole } from "@declarations/authentication/authentication.did";
-// Tipe untuk Opsi Auth
+import { canisterId, createActor } from "@declarations/user";
+import { _SERVICE } from "@declarations/user/user.did";
+
 interface AuthOptions {
   createOptions?: AuthClientCreateOptions;
   loginOptions?: AuthClientLoginOptions;
@@ -42,7 +42,6 @@ type AuthProviderProps = {
 export type UserCredentials = {
   name: string;
   email: string;
-  role: UserRole;
   principalAddress: string;
   identity: Identity | null;
 }

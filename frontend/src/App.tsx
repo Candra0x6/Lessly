@@ -1,20 +1,18 @@
 import { useAuth, AuthProvider } from "./utility/use-auth-client";
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Others
-
+import { Toaster } from "@/components/ui/toaster";
 import { RegistrationProvider } from "./utility/RegistrationContext";
-import InternetIdentityPage from "./pages/auth/internet-identity-login";
+import EditorPage from "./pages/editor/[id]/page";
+import PreviewPage from "./pages/preview/[id]/page";
+import DashboardPage from "./pages/dashboard/page";
 
-  import { backend } from "@declarations/backend";
-
+import { backend } from "@declarations/backend";
+import InternetIdentityPage from "./pages/auth/internet-identity/internet-identity-login";
+import LandingPage from "./pages/page";
 
 const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
   useEffect(() => {
@@ -40,27 +38,18 @@ const AnimatedRoutes: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
 
-
   return (
     <>
-
       {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
 
       <AnimatePresence mode="wait">
-
         {/* <Navbar /> */}
         {!loading && (
           <Routes location={location} key={location.pathname}>
             {/* DEFAULT PAGES SECTION */}
 
-            <Route path="/" element={
-                <div className="">
-                  <h1>Hello World</h1>
-                </div>
-              
-            } />
+            <Route path="/" element={<LandingPage />} />
 
-        
             <Route
               path="/internet-identity"
               element={
@@ -70,10 +59,39 @@ const AnimatedRoutes: React.FC = () => {
               }
             />
 
-         
+            {/* DASHBOARD SECTION */}
+            <Route
+              path="/dashboard"
+              element={
+                <div className="">
+                  <DashboardPage />
+                </div>
+              }
+            />
+
+            {/* EDITOR SECTION */}
+            <Route
+              path="/editor/:id"
+              element={
+                <div className="">
+                  <EditorPage />
+                </div>
+              }
+            />
+
+            {/* PREVIEW SECTION */}
+            <Route
+              path="/preview/:id"
+              element={
+                <div className="">
+                  <PreviewPage />
+                </div>
+              }
+            />
           </Routes>
         )}
       </AnimatePresence>
+      <Toaster />
     </>
   );
 };
@@ -92,7 +110,6 @@ const App: React.FC = () => {
     const checkIfRegistered = async () => {
       if (isAuthenticated && principal) {
         try {
-
           // @ts-ignore
           const result = await backend.getUserByPrincipal(principal);
           result ? setIsRegistered(true) : setIsRegistered(false);
@@ -118,7 +135,6 @@ const App: React.FC = () => {
     <main id="pageContent">
       <BrowserRouter>
         {/* @ts-ignore */}
-        <Toaster position="top-center" />
         <AnimatedRoutes />
       </BrowserRouter>
     </main>
