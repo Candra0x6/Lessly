@@ -3,98 +3,108 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Clock, Globe, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProtectedRoute from "@/utility/ProtectedRoute";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/utility/use-auth-client";
+import { useProjectManagement } from "@/hooks/useProjectManagement";
+import { Project } from "@declarations/project_management/project_management.did";
 
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  lastModified: string;
-  template: string;
-}
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  ProjectSettingDropdown,
+  PublishProjectDropdown,
+} from "@/components/dropdown/project-card-dropdown";
+import toast from "react-hot-toast";
 
 const DashboardPage = () => {
   const { isAuthenticated, principal } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState("all");
+  const { getUserProjects, publishProject, loading, error } =
+    useProjectManagement();
 
   useEffect(() => {
     const fetchProjects = async () => {
+      if (!principal) return;
+
       try {
-        const mockProjects = [
-          {
-            id: "project-1",
-            name: "Personal Website",
-            description: "My personal portfolio website",
-            lastModified: new Date().toLocaleDateString(),
-            template: "portfolio",
-          },
-          {
-            id: "project-2",
-            name: "Business Landing Page",
-            description: "A landing page for my business",
-            lastModified: new Date().toLocaleDateString(),
-            template: "landing",
-          },
-          {
-            id: "project-3",
-            name: "Blog Website",
-            description: "A blog for sharing my thoughts",
-            lastModified: new Date().toLocaleDateString(),
-            template: "blog",
-          },
-        ];
-        setProjects(mockProjects);
+        setIsLoading(true);
+        const userProjects = await getUserProjects(principal);
+        console.log(userProjects);
+        setProjects(userProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load your projects",
-          variant: "destructive",
-        });
+        toast.error("Failed to fetch projects");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProjects();
+    if (isAuthenticated && principal) {
+      fetchProjects();
+    }
   }, []);
 
   const handleCreateProject = () => {
-    const newProject = {
-      id: `project-${Date.now()}`,
-      name: "Untitled Project",
-      description: "A new website project",
-      lastModified: new Date().toLocaleDateString(),
-      template: "blank",
-    };
-
-    setProjects([...projects, newProject]);
-    navigate(`/editor/${newProject.id}`);
-    toast({
-      title: "Project created",
-      description: "Your new project has been created",
-    });
+    navigate("/dashboard/create-project");
   };
 
   const handleEditProject = (projectId: string) => {
     navigate(`/editor/${projectId}`);
   };
 
+  const handleViewProject = (urlSlug: string) => {
+    navigate(`/site/${urlSlug}`);
+  };
+
+  const handlePublishToggle = async (
+    projectId: string,
+    currentStatus: boolean
+  ) => {
+    try {
+      const result = await publishProject(projectId, !currentStatus);
+      if ("ok" in result) {
+        setProjects(projects.map((p) => (p.id === projectId ? result.ok : p)));
+
+        toast.success(
+          `Project ${!currentStatus ? "published" : "unpublished"} successfully`
+        );
+      } else {
+        throw new Error("Failed to update project status");
+      }
+    } catch (error) {
+      console.error("Error updating project status:", error);
+      toast.error("Failed to update project status");
+    }
+  };
+
   const handleDeleteProject = (projectId: string) => {
+    // In a real implementation, you would call a delete function from useProjectManagement
+    // For now we'll just remove it from the local state
     setProjects(projects.filter((project) => project.id !== projectId));
-    toast({
-      title: "Project deleted",
-      description: "Your project has been deleted",
-    });
+    toast.success("Project deleted successfully");
+  };
+
+  const filteredProjects = projects.filter((project) => {
+    if (activeTab === "published") return project.published;
+    if (activeTab === "drafts") return !project.published;
+    return true; // "all" tab
+  });
+
+  const formatDate = (timestamp: bigint) => {
+    // Convert nanoseconds to milliseconds
+    const date = new Date(Number(timestamp) / 1000000);
+    return date.toLocaleDateString();
   };
 
   return (
@@ -106,11 +116,23 @@ const DashboardPage = () => {
             <Button onClick={handleCreateProject}>Create New Project</Button>
           </div>
 
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="mb-6 "
+          >
+            <TabsList>
+              <TabsTrigger value="all">All Projects</TabsTrigger>
+              <TabsTrigger value="published">Published</TabsTrigger>
+              <TabsTrigger value="drafts">Drafts</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               Loading projects...
             </div>
-          ) : projects.length === 0 ? (
+          ) : filteredProjects.length === 0 ? (
             <div className="text-center py-12 border rounded-lg bg-card">
               <h3 className="text-lg font-medium mb-2">No projects yet</h3>
               <p className="text-muted-foreground mb-4">
@@ -120,36 +142,87 @@ const DashboardPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <div
+              {filteredProjects.map((project) => (
+                <motion.div
                   key={project.id}
-                  className="border rounded-lg p-6 bg-card hover:shadow-md transition-shadow"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="border rounded-lg overflow-hidden bg-card"
                 >
-                  <h3 className="text-lg font-medium mb-2">{project.name}</h3>
-                  <p className="text-muted-foreground mb-4">
-                    {project.description}
-                  </p>
-                  <div className="text-sm text-muted-foreground mb-4">
-                    <p>Last modified: {project.lastModified}</p>
-                    <p>Template: {project.template}</p>
+                  <div className="p-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-medium">{project.name}</h3>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          project.published
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {project.published ? "Published" : "Draft"}
+                      </span>
+                    </div>
+                    <p className="text-muted-foreground mb-4 line-clamp-2">
+                      {project.description}
+                    </p>
+                    <div className="flex items-center text-sm text-muted-foreground mb-4">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>
+                        Last updated: {formatDate(project.updated_at)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center justify-center"
+                          >
+                            <Settings2 className="h-4 w-4 mr-1" />
+                            Settings
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <ProjectSettingDropdown
+                            handleDelete={() => handleDeleteProject(project.id)}
+                            handleEdit={() => handleEditProject(project.id)}
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center justify-center"
+                          >
+                            <Globe className="h-4 w-4 mr-1" />
+                            {project.published ? "Unpublish" : "Publish"}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <PublishProjectDropdown
+                            handleView={() =>
+                              handleViewProject(project.url_slug)
+                            }
+                            site={
+                              window.location.origin +
+                              "/site/" +
+                              project.url_slug
+                            }
+                            handlePublish={() =>
+                              handlePublishToggle(project.id, project.published)
+                            }
+                            isPublished={project.published}
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditProject(project.id)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteProject(project.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}

@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Globe, Code, Zap, Lock, Database, Layers } from "lucide-react"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Globe, Code, Zap, Lock, Database, Layers } from "lucide-react";
 
 export default function Hero() {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
 
   const container = {
     hidden: { opacity: 0 },
@@ -16,30 +16,46 @@ export default function Hero() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  }
+  };
 
   const floatingIcons = [
     { icon: <Globe className="h-6 w-6" />, color: "text-blue-500", delay: 0 },
-    { icon: <Code className="h-6 w-6" />, color: "text-purple-500", delay: 0.1 },
+    {
+      icon: <Code className="h-6 w-6" />,
+      color: "text-purple-500",
+      delay: 0.1,
+    },
     { icon: <Zap className="h-6 w-6" />, color: "text-yellow-500", delay: 0.2 },
     { icon: <Lock className="h-6 w-6" />, color: "text-green-500", delay: 0.3 },
-    { icon: <Database className="h-6 w-6" />, color: "text-pink-500", delay: 0.4 },
-    { icon: <Layers className="h-6 w-6" />, color: "text-orange-500", delay: 0.5 },
-  ]
+    {
+      icon: <Database className="h-6 w-6" />,
+      color: "text-pink-500",
+      delay: 0.4,
+    },
+    {
+      icon: <Layers className="h-6 w-6" />,
+      color: "text-orange-500",
+      delay: 0.5,
+    },
+  ];
 
   return (
     <section className="relative  pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
       <div className="absolute bottom-0 left-0 right-0 top-0 z-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:54px_54px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 dark:opacity-100"></div>
 
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-          <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 mb-12">
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="space-y-6 mb-12"
+          >
             <motion.div variants={item} className="inline-block">
               <span className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                 <span className="flex h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
@@ -51,20 +67,32 @@ export default function Hero() {
               variants={item}
               className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white"
             >
-              Build Visually. Deploy Instantly.{" "}
+              Build Visually.
+              <br />
               <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-                Own Your Web Presence Forever.
+                Publish Instantly.{" "}
               </span>
             </motion.h1>
 
-            <motion.p variants={item} className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Create stunning websites with zero code using our powerful visual builder, then launch them on the
-              Internet Computer with just one click. Your site lives on-chain—secure, censorship-resistant, and always
-              online.
+            <motion.p
+              variants={item}
+              className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+            >
+              Create stunning websites with zero code using our powerful visual
+              builder, then launch them on the Internet Computer with just one
+              click. Your site lives on-chain—secure, censorship-resistant, and
+              always online.
             </motion.p>
 
-            <motion.div variants={item} className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white">
+            <motion.div
+              variants={item}
+              className="flex flex-col sm:flex-row gap-4 justify-center pt-4"
+            >
+              <Button
+                onClick={() => (window.location.href = "/auth")}
+                size="lg"
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
                 Start Building Now
               </Button>
               <Button size="lg" variant="outline">
@@ -117,8 +145,34 @@ export default function Hero() {
                   className="absolute w-6 h-6 pointer-events-none"
                   initial={{ x: "50%", y: "50%" }}
                   animate={{
-                    x: ["50%", "30%", "70%", "40%", "60%", "50%", "50%", "50%", "50%", "50%", "50%", "50%"],
-                    y: ["50%", "30%", "60%", "70%", "40%", "50%", "50%", "50%", "50%", "50%", "50%", "50%"],
+                    x: [
+                      "50%",
+                      "30%",
+                      "70%",
+                      "40%",
+                      "60%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                    ],
+                    y: [
+                      "50%",
+                      "30%",
+                      "60%",
+                      "70%",
+                      "40%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                      "50%",
+                    ],
                     scale: [1, 1, 1, 1, 1, 0.8, 1.2, 0.9, 1.1, 1, 1, 1],
                   }}
                   transition={{
@@ -149,14 +203,16 @@ export default function Hero() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <div className="h-4 w-4 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Ready to deploy</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Ready to publish
+                    </span>
                   </div>
                   <motion.div
                     className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    Deploy to IC
+                    Publish to IC
                   </motion.div>
                 </div>
               </div>
@@ -198,5 +254,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -48,14 +48,6 @@ actor ProjectManagement {
     let projectId = name # "-" # Principal.toText(caller);
     let versionId = "v1-" # projectId;
 
-    // Create URL slug from name (simplified)
-    let url_slug = Text.map(
-      name,
-      func(c : Char) : Char {
-        if (c == ' ') { '-' } else { c };
-      },
-    );
-
     // Create new project
     let newProject : Project = {
       id = projectId;
@@ -65,7 +57,7 @@ actor ProjectManagement {
       created_at = now;
       updated_at = now;
       published = false;
-      url_slug = url_slug;
+      url_slug = projectId;
       collaborators = [];
       current_version = versionId;
       template_id = template_id;

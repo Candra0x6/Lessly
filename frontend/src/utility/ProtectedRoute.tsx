@@ -12,7 +12,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ isAuthenticated, childr
   useEffect(() => {
     // If the user is not authenticated, navigate to the login page
     if (!isAuthenticated) {
-      navigate('/internet-identity', { replace: true });
+      navigate('/auth', { replace: true });
     }
   }, [isAuthenticated, navigate]);  // Re-run effect if isAuthenticated or navigate changes
 

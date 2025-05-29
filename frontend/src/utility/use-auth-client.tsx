@@ -102,7 +102,7 @@ export const useAuthClient = (
       onSuccess: () => {
         updateClient(authClient);
         toast.success("Internet Identity Login Successful");
-        window.location.href = "/auth";
+        window.location.href = "/auth/register";
       },
     });
   };

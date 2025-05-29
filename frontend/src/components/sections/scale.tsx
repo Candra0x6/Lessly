@@ -1,32 +1,35 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Brain, Database, Globe } from "lucide-react"
+import { motion } from "framer-motion";
+import { Brain, Database, Globe } from "lucide-react";
 
 export default function Scale() {
   const features = [
     {
       icon: <Brain className="h-6 w-6" />,
       title: "Powered by Internet Computer",
-      description: "Leverage the power of the Internet Computer Protocol for a truly decentralized web experience.",
+      description:
+        "Leverage the power of the Internet Computer Protocol for a truly decentralized web experience.",
       color: "text-blue-500",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
     {
       icon: <Database className="h-6 w-6" />,
       title: "Dynamic Canister Storage",
-      description: "Your website is stored in dedicated smart canisters, providing secure and scalable storage.",
+      description:
+        "Your website is stored in dedicated smart canisters, providing secure and scalable storage.",
       color: "text-purple-500",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
     },
     {
       icon: <Globe className="h-6 w-6" />,
       title: "Serve Unlimited Websites",
-      description: "Create and deploy as many websites as you need, all running on the decentralized web.",
+      description:
+        "Create and publish as many websites as you need, all running on the decentralized web.",
       color: "text-green-500",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
-  ]
+  ];
 
   return (
     <section id="scale" className="py-20 max-w-7xl mx-auto">
@@ -42,8 +45,9 @@ export default function Scale() {
             Made for Scale. Built for Web3.
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            We've built this platform to scale with your ambitions. Under the hood, every project is stored in a
-            dedicated file space and served dynamically via our Motoko smart canisters—offering performance,
+            We've built this platform to scale with your ambitions. Under the
+            hood, every project is stored in a dedicated file space and served
+            dynamically via our Motoko smart canisters—offering performance,
             flexibility, and full ownership.
           </p>
         </motion.div>
@@ -65,8 +69,12 @@ export default function Scale() {
               >
                 {feature.icon}
               </motion.div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {feature.description}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -82,11 +90,14 @@ export default function Scale() {
           <div className="relative bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800">
             <div className="grid md:grid-cols-2">
               <div className="p-8">
-                <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Technical Architecture</h3>
+                <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+                  Technical Architecture
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Our platform leverages the Internet Computer's unique architecture to provide a truly decentralized
-                  web experience. Each website is stored in a dedicated canister, ensuring security, scalability, and
-                  ownership.
+                  Our platform leverages the Internet Computer's unique
+                  architecture to provide a truly decentralized web experience.
+                  Each website is stored in a dedicated canister, ensuring
+                  security, scalability, and ownership.
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-start">
@@ -146,7 +157,8 @@ export default function Scale() {
                       </svg>
                     </div>
                     <p className="ml-3 text-gray-700 dark:text-gray-300">
-                      Automatic content delivery through the Internet Computer Protocol
+                      Automatic content delivery through the Internet Computer
+                      Protocol
                     </p>
                   </li>
                 </ul>
@@ -157,7 +169,10 @@ export default function Scale() {
                     animate={{
                       y: [0, -10, 0],
                     }}
-                    transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
+                    transition={{
+                      duration: 4,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
                     className="absolute -top-6 -left-6 w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white"
                   >
                     <Brain className="h-6 w-6" />
@@ -166,14 +181,20 @@ export default function Scale() {
                     animate={{
                       y: [0, 10, 0],
                     }}
-                    transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, delay: 1 }}
+                    transition={{
+                      duration: 4,
+                      repeat: Number.POSITIVE_INFINITY,
+                      delay: 1,
+                    }}
                     className="absolute -bottom-6 -right-6 w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white"
                   >
                     <Database className="h-6 w-6" />
                   </motion.div>
                   <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-800">
                     <div className="flex justify-between items-center mb-6">
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">Internet Computer</div>
+                      <div className="text-lg font-bold text-gray-900 dark:text-white">
+                        Internet Computer
+                      </div>
                       <div className="h-4 w-4 rounded-full bg-green-500"></div>
                     </div>
                     <div className="space-y-4">
@@ -200,5 +221,5 @@ export default function Scale() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

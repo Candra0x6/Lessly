@@ -1,21 +1,30 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Check, HelpCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Check, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Pricing() {
-  const [annual, setAnnual] = useState(true)
+  const [annual, setAnnual] = useState(true);
 
   const plans = [
     {
       name: "Free",
       description: "For individuals just getting started",
       price: { monthly: 0, annual: 0 },
-      features: ["Basic command palette", "5 AI commands per day", "Standard response time", "Community support"],
+      features: [
+        "Basic command palette",
+        "Standard response time",
+        "Community support",
+      ],
       cta: "Get Started",
       popular: false,
     },
@@ -25,7 +34,6 @@ export default function Pricing() {
       price: { monthly: 12, annual: 9 },
       features: [
         "Advanced command palette",
-        "Unlimited AI commands",
         "Priority response time",
         "Voice commands",
         "Cross-platform sync",
@@ -49,7 +57,7 @@ export default function Pricing() {
       cta: "Contact Sales",
       popular: false,
     },
-  ]
+  ];
 
   const container = {
     hidden: { opacity: 0 },
@@ -59,15 +67,18 @@ export default function Pricing() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  }
+  };
 
   return (
-    <section id="pricing" className="py-20 bg-gray-50 dark:bg-zinc-950">
+    <section
+      id="pricing"
+      className="py-20 bg-background max-w-7xl mx-auto rounded-2xl"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={container}
@@ -82,22 +93,44 @@ export default function Pricing() {
               Simple Pricing
             </span>
           </motion.div>
-          <motion.h2 variants={item} className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
+          <motion.h2
+            variants={item}
+            className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white"
+          >
             Choose the perfect plan for your needs
           </motion.h2>
-          <motion.p variants={item} className="text-xl text-gray-600 dark:text-gray-400">
-            Start for free and upgrade as you grow. All plans come with a 14-day money-back guarantee.
+          <motion.p
+            variants={item}
+            className="text-xl text-gray-600 dark:text-gray-400"
+          >
+            Start for free and upgrade as you grow. All plans come with a 14-day
+            money-back guarantee.
           </motion.p>
 
-          <motion.div variants={item} className="flex items-center justify-center mt-8 space-x-3">
+          <motion.div
+            variants={item}
+            className="flex items-center justify-center mt-8 space-x-3"
+          >
             <span
-              className={`text-sm font-medium ${!annual ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}
+              className={`text-sm font-medium ${
+                !annual
+                  ? "text-gray-900 dark:text-white"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
             >
               Monthly
             </span>
-            <Switch checked={annual} onCheckedChange={setAnnual} className="data-[state=checked]:bg-blue-500" />
+            <Switch
+              checked={annual}
+              onCheckedChange={setAnnual}
+              className="data-[state=checked]:bg-blue-500"
+            />
             <span
-              className={`text-sm font-medium ${annual ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}
+              className={`text-sm font-medium ${
+                annual
+                  ? "text-gray-900 dark:text-white"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
             >
               Annual
               <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
@@ -115,7 +148,7 @@ export default function Pricing() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true, margin: "-100px" }}
-              className={`relative rounded-2xl overflow-hidden ${
+              className={`relative rounded-2xl overflow-hidden dark:bg-zinc-900  ${
                 plan.popular
                   ? "border-2 border-blue-500 shadow-xl shadow-blue-500/10"
                   : "border border-gray-200 dark:border-gray-800 shadow-lg"
@@ -128,21 +161,35 @@ export default function Pricing() {
               )}
 
               <div className="p-6 bg-white dark:bg-zinc-900">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{plan.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{plan.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                  {plan.name}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  {plan.description}
+                </p>
 
                 <div className="mb-6">
                   <span className="text-4xl font-bold text-gray-900 dark:text-white">
                     ${annual ? plan.price.annual : plan.price.monthly}
                   </span>
                   {plan.price.monthly > 0 && (
-                    <span className="text-gray-600 dark:text-gray-400 ml-1">/{annual ? "mo" : "mo"}</span>
+                    <span className="text-gray-600 dark:text-gray-400 ml-1">
+                      /{annual ? "mo" : "mo"}
+                    </span>
                   )}
-                  {annual && plan.price.monthly > 0 && <p className="text-sm text-gray-500 mt-1">Billed annually</p>}
+                  {annual && plan.price.monthly > 0 && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Billed annually
+                    </p>
+                  )}
                 </div>
 
                 <Button
-                  className={`w-full mb-6 ${plan.popular ? "bg-blue-500 hover:bg-blue-600 text-white" : ""}`}
+                  className={`w-full mb-6 ${
+                    plan.popular
+                      ? "bg-blue-500 hover:bg-blue-600 text-white"
+                      : ""
+                  }`}
                   variant={plan.popular ? "default" : "outline"}
                 >
                   {plan.cta}
@@ -154,7 +201,9 @@ export default function Pricing() {
                       <div className="flex-shrink-0 h-5 w-5 text-blue-500">
                         <Check className="h-5 w-5" />
                       </div>
-                      <p className="ml-3 text-sm text-gray-700 dark:text-gray-300">{feature}</p>
+                      <p className="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                        {feature}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -182,7 +231,8 @@ export default function Pricing() {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="max-w-xs">
-                    Our enterprise plan includes custom integrations, dedicated support, and advanced security features.
+                    Our enterprise plan includes custom integrations, dedicated
+                    support, and advanced security features.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -197,5 +247,5 @@ export default function Pricing() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

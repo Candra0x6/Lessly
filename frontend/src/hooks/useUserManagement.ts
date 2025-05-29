@@ -14,16 +14,15 @@ export function useUserManagement() {
   /**
    * Create a new user
    * @param username - The user's username
-   * @param email - The user's email
    * @returns Promise with the result
    */
   const createUser = useCallback(
-    async (username: string, email: string): Promise<Result<User, string>> => {
+    async (username: string): Promise<Result<User, string>> => {
       setLoading(true);
       setError(null);
 
       try {
-        const result = await actor.createUser(username, email);
+        const result = await actor.createUser(username);
         return result;
       } catch (e) {
         console.error("Failed to create user:", e);

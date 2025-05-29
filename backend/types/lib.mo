@@ -37,7 +37,6 @@ module {
     public type User = {
         id : UserId;
         username : Text;
-        email : Text;
         principal : Principal;
         created_at : Int;
         updated_at : Int;

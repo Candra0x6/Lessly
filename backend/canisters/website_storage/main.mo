@@ -256,4 +256,9 @@ actor WebsiteStorage {
       };
     };
   };
+
+  // Get all assets
+  public query func getAssetsIds() : async [AssetId] {
+    return Iter.toArray(assets.keys());
+  };
 };

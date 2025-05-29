@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Palette, Megaphone, Construction } from "lucide-react"
+import { motion } from "framer-motion";
+import { Palette, Megaphone, Construction } from "lucide-react";
 
 export default function Audience() {
   const audiences = [
@@ -22,11 +22,11 @@ export default function Audience() {
     {
       icon: <Construction className="h-8 w-8" />,
       title: "Builders",
-      description: "Deploy fast, iterate faster",
+      description: "Publish fast, iterate faster",
       color: "text-blue-500",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
     },
-  ]
+  ];
 
   return (
     <section className="py-20 max-w-7xl mx-auto">
@@ -42,8 +42,9 @@ export default function Audience() {
             Perfect for Creators, Startups, and Builders
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Whether you're a freelancer, startup founder, or community leader, our platform gives you a competitive
-            edge. Launch product pages, portfolios, or landing pages that scale securely from day one.
+            Whether you're a freelancer, startup founder, or community leader,
+            our platform gives you a competitive edge. Launch product pages,
+            portfolios, or landing pages that scale securely from day one.
           </p>
         </motion.div>
 
@@ -65,8 +66,12 @@ export default function Audience() {
               >
                 {audience.icon}
               </motion.div>
-              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{audience.title}</h3>
-              <p className="text-lg text-gray-600 dark:text-gray-400">{audience.description}</p>
+              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+                {audience.title}
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                {audience.description}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -78,9 +83,12 @@ export default function Audience() {
           viewport={{ once: true, margin: "-100px" }}
           className="mt-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-8 text-white text-center max-w-4xl mx-auto"
         >
-          <h3 className="text-2xl font-bold mb-4">Ready to launch your next project?</h3>
+          <h3 className="text-2xl font-bold mb-4">
+            Ready to launch your next project?
+          </h3>
           <p className="text-lg text-blue-100 mb-6">
-            Join thousands of creators who are already building on the decentralized web.
+            Join thousands of creators who are already building on the
+            decentralized web.
           </p>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -92,5 +100,5 @@ export default function Audience() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

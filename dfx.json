@@ -1,18 +1,5 @@
   {
     "canisters": {
-      "website_render": {
-        "main": "backend/canisters/website_render/main.mo",
-        "type": "motoko",
-        "declarations": {
-          "node_compatibility": true
-        },
-        "dependencies": ["website_storage", "project_management"],
-        "remote": {
-          "id": {
-            "ic": "umunu-kh777-77774-qaaca-cai"
-          }
-        }
-      },
 
       "website_storage": {
         "main": "backend/canisters/website_storage/main.mo",

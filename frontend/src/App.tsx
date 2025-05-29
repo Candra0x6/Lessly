@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Others
-import { Toaster } from "@/components/ui/toaster";
 import { RegistrationProvider } from "./utility/RegistrationContext";
 import EditorPage from "./pages/editor/[id]/page";
 import PreviewPage from "./pages/preview/[id]/page";
 import DashboardPage from "./pages/dashboard/page";
 
 import { backend } from "@declarations/backend";
-import InternetIdentityPage from "./pages/auth/internet-identity/internet-identity-login";
 import LandingPage from "./pages/page";
+import AuthPage from "./pages/auth/page";
+import RegisterPage from "./pages/auth/register/page";
+import { Toaster } from "react-hot-toast";
+import CreateProjectPage from "./pages/dashboard/create-project/page";
+import SitePage from "./pages/site/[id]/page";
 
 const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
   useEffect(() => {
@@ -41,6 +44,7 @@ const AnimatedRoutes: React.FC = () => {
   return (
     <>
       {loading && <LoadingScreen onComplete={() => setLoading(false)} />}
+      <Toaster />
 
       <AnimatePresence mode="wait">
         {/* <Navbar /> */}
@@ -51,10 +55,27 @@ const AnimatedRoutes: React.FC = () => {
             <Route path="/" element={<LandingPage />} />
 
             <Route
-              path="/internet-identity"
+              path="/auth"
               element={
                 <div className="">
-                  <InternetIdentityPage />
+                  <AuthPage />
+                </div>
+              }
+            />
+
+            <Route
+              path="/auth/register"
+              element={
+                <div className="">
+                  <RegisterPage />
+                </div>
+              }
+            />
+            <Route
+              path="/dashboard/create-project"
+              element={
+                <div className="">
+                  <CreateProjectPage />
                 </div>
               }
             />
@@ -88,10 +109,18 @@ const AnimatedRoutes: React.FC = () => {
                 </div>
               }
             />
+
+            <Route
+              path="/site/:id"
+              element={
+                <div className="">
+                  <SitePage />
+                </div>
+              }
+            />
           </Routes>
         )}
       </AnimatePresence>
-      <Toaster />
     </>
   );
 };

@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { motion, useAnimation } from "framer-motion"
-import { useEffect } from "react"
-import { useInView } from "react-intersection-observer"
-import { Zap, Check } from "lucide-react"
+import { motion, useAnimation } from "framer-motion";
+import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import { Zap, Check } from "lucide-react";
 
 export default function Deploy() {
-  const controls = useAnimation()
-  const [ref, inView] = useInView({ threshold: 0.2, triggerOnce: true })
+  const controls = useAnimation();
+  const [ref, inView] = useInView({ threshold: 0.2, triggerOnce: true });
 
   useEffect(() => {
     if (inView) {
-      controls.start("visible")
+      controls.start("visible");
     }
-  }, [controls, inView])
+  }, [controls, inView]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -23,12 +23,12 @@ export default function Deploy() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  }
+  };
 
   const benefits = [
     {
@@ -43,33 +43,48 @@ export default function Deploy() {
       icon: <Check className="h-5 w-5" />,
       text: "Instant Content Updates",
     },
-  ]
+  ];
 
   return (
     <section id="deploy" className="py-20 max-w-7xl mx-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div ref={ref} initial="hidden" animate={controls} variants={container} className="order-2 md:order-1">
+          <motion.div
+            ref={ref}
+            initial="hidden"
+            animate={controls}
+            variants={container}
+            className="order-2 md:order-1"
+          >
             <motion.div variants={item} className="inline-block mb-4">
               <span className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                 <Zap className="h-4 w-4 mr-1" />
-                One-Click Deploy
+                One-Click Publish
               </span>
             </motion.div>
-            <motion.h2 variants={item} className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white">
+            <motion.h2
+              variants={item}
+              className="text-3xl md:text-4xl font-bold mb-6 text-gray-900 dark:text-white"
+            >
               One Click to Go Live — Instantly on the Blockchain
             </motion.h2>
-            <motion.p variants={item} className="text-lg text-gray-600 dark:text-gray-400 mb-6">
-              Say goodbye to domain configuration, hosting plans, and deployment pipelines. With a single click, your
-              site is instantly published on the <strong>Internet Computer Protocol</strong>, giving you a public,
-              permanent web address like:
+            <motion.p
+              variants={item}
+              className="text-lg text-gray-600 dark:text-gray-400 mb-6"
+            >
+              Say goodbye to domain configuration, hosting plans, and deployment
+              pipelines. With a single click, your site is instantly published
+              on the <strong>Internet Computer Protocol</strong>, giving you a
+              public, permanent web address like:
             </motion.p>
 
             <motion.div
               variants={item}
               className="bg-gray-100 dark:bg-zinc-800 p-4 rounded-lg font-mono text-sm mb-8 overflow-x-auto"
             >
-              <code className="text-blue-600 dark:text-blue-400">https://yourapp.ic0.app/yourproject/web</code>
+              <code className="text-blue-600 dark:text-blue-400">
+                https://yourapp.ic0.app/yourproject/web
+              </code>
             </motion.div>
 
             <motion.div variants={container} className="space-y-4">
@@ -86,7 +101,9 @@ export default function Deploy() {
                       {benefit.icon}
                     </div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">{benefit.text}</p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {benefit.text}
+                  </p>
                 </motion.div>
               ))}
             </motion.div>
@@ -109,7 +126,9 @@ export default function Deploy() {
                       <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                       <div className="w-3 h-3 rounded-full bg-green-500"></div>
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Deploy.ic</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Publish.ic
+                    </div>
                   </div>
 
                   <div className="space-y-6">
@@ -133,10 +152,14 @@ export default function Deploy() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, repeatDelay: 2 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        repeatDelay: 2,
+                      }}
                     >
                       <Zap className="h-5 w-5 mr-2" />
-                      <span>Deploy to Internet Computer</span>
+                      <span>Publish to Internet Computer</span>
                     </motion.div>
                   </div>
                 </div>
@@ -145,9 +168,13 @@ export default function Deploy() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="h-4 w-4 rounded-full bg-green-500"></div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Ready to deploy</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Ready to publish
+                      </span>
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Estimated time: 5 seconds</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Estimated time: 5 seconds
+                    </div>
                   </div>
                 </div>
               </div>
@@ -156,7 +183,11 @@ export default function Deploy() {
               <motion.div
                 className="absolute -top-6 -right-6 w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center text-white"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                transition={{
+                  duration: 10,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
               >
                 <Zap className="h-6 w-6" />
               </motion.div>
@@ -165,5 +196,5 @@ export default function Deploy() {
         </div>
       </div>
     </section>
-  )
+  );
 }

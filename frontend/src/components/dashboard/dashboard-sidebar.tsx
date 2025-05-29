@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   LayoutGrid,
   FolderOpen,
@@ -16,47 +15,73 @@ import {
   PlusCircle,
   Users,
   CreditCard,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface NavItemProps {
-  icon: React.ReactNode
-  label: string
-  href: string
-  active?: boolean
-  collapsed?: boolean
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  active?: boolean;
+  collapsed?: boolean;
 }
 
 function NavItem({ icon, label, href, active, collapsed }: NavItemProps) {
   return (
     <Link
-      href={href}
+      to={href}
       className={cn(
         "flex items-center space-x-3 px-3 py-2 rounded-md transition-colors",
         active
           ? "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-300"
-          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800",
+          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800"
       )}
     >
       {icon}
       {!collapsed && <span>{label}</span>}
     </Link>
-  )
+  );
 }
 
 export default function DashboardSidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(false);
 
   const navItems = [
     { icon: <Home className="h-5 w-5" />, label: "Home", href: "/dashboard" },
-    { icon: <LayoutGrid className="h-5 w-5" />, label: "Projects", href: "/dashboard", active: true },
-    { icon: <FolderOpen className="h-5 w-5" />, label: "Templates", href: "/dashboard/templates" },
-    { icon: <Users className="h-5 w-5" />, label: "Team", href: "/dashboard/team" },
-    { icon: <CreditCard className="h-5 w-5" />, label: "Billing", href: "/dashboard/billing" },
-    { icon: <Settings className="h-5 w-5" />, label: "Settings", href: "/dashboard/settings" },
-    { icon: <HelpCircle className="h-5 w-5" />, label: "Help", href: "/dashboard/help" },
-  ]
+    {
+      icon: <LayoutGrid className="h-5 w-5" />,
+      label: "Projects",
+      href: "/dashboard",
+      active: true,
+    },
+    {
+      icon: <FolderOpen className="h-5 w-5" />,
+      label: "Templates",
+      href: "/dashboard/templates",
+    },
+    {
+      icon: <Users className="h-5 w-5" />,
+      label: "Team",
+      href: "/dashboard/team",
+    },
+    {
+      icon: <CreditCard className="h-5 w-5" />,
+      label: "Billing",
+      href: "/dashboard/billing",
+    },
+    {
+      icon: <Settings className="h-5 w-5" />,
+      label: "Settings",
+      href: "/dashboard/settings",
+    },
+    {
+      icon: <HelpCircle className="h-5 w-5" />,
+      label: "Help",
+      href: "/dashboard/help",
+    },
+  ];
 
   return (
     <motion.aside
@@ -65,7 +90,7 @@ export default function DashboardSidebar() {
       transition={{ duration: 0.3 }}
       className={cn(
         "border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-zinc-900 flex flex-col",
-        collapsed ? "items-center" : "",
+        collapsed ? "items-center" : ""
       )}
     >
       <div className={cn("p-4", collapsed ? "flex justify-center" : "")}>
@@ -94,7 +119,7 @@ export default function DashboardSidebar() {
             <path d="M17 17h.01" />
           </svg>
         ) : (
-          <Link href="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -125,7 +150,12 @@ export default function DashboardSidebar() {
         )}
       </div>
 
-      <div className={cn("mt-6 flex-1 px-3 space-y-1", collapsed ? "w-full flex flex-col items-center" : "")}>
+      <div
+        className={cn(
+          "mt-6 flex-1 px-3 space-y-1",
+          collapsed ? "w-full flex flex-col items-center" : ""
+        )}
+      >
         {navItems.map((item, index) => (
           <NavItem
             key={index}
@@ -152,9 +182,13 @@ export default function DashboardSidebar() {
           className="mt-4 mx-auto flex"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          {collapsed ? (
+            <ChevronRight className="h-5 w-5" />
+          ) : (
+            <ChevronLeft className="h-5 w-5" />
+          )}
         </Button>
       </div>
     </motion.aside>
-  )
+  );
 }

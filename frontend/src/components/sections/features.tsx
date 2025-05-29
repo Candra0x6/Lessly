@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { MousePointer, Palette, Eye, MousePointer2 } from "lucide-react"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { MousePointer, Palette, Eye, MousePointer2 } from "lucide-react";
 
 export default function Features() {
-  const [activeFeature, setActiveFeature] = useState(0)
+  const [activeFeature, setActiveFeature] = useState(0);
 
   const features = [
     {
@@ -13,23 +13,26 @@ export default function Features() {
       color: "text-blue-500",
       bgColor: "bg-blue-100 dark:bg-blue-900/30",
       title: "Visual Builder",
-      description: "Design your website visually with our intuitive drag-and-drop interface. No coding required.",
+      description:
+        "Design your website visually with our intuitive drag-and-drop interface. No coding required.",
     },
     {
       icon: <Palette className="h-6 w-6" />,
       color: "text-purple-500",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
       title: "Fully Customizable Templates",
-      description: "Start with professionally designed templates and customize every aspect to match your brand.",
+      description:
+        "Start with professionally designed templates and customize every aspect to match your brand.",
     },
     {
       icon: <Eye className="h-6 w-6" />,
       color: "text-green-500",
       bgColor: "bg-green-100 dark:bg-green-900/30",
-      title: "Live Preview and Instant Deploy",
-      description: "See changes in real-time and deploy instantly to the Internet Computer blockchain.",
+      title: "Live Preview and Instant Publish",
+      description:
+        "See changes in real-time and publish instantly to the Internet Computer blockchain.",
     },
-  ]
+  ];
 
   const container = {
     hidden: { opacity: 0 },
@@ -39,15 +42,15 @@ export default function Features() {
         staggerChildren: 0.1,
       },
     },
-  }
+  };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  }
+  };
 
   const featureScreens = [
-    <div key="visual-builder" className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-4 h-full ">
+    <div key="visual-builder" className=" rounded-lg shadow-lg p-4 h-full ">
       <div className="flex items-center space-x-2 mb-4">
         <div className="w-3 h-3 rounded-full bg-red-500"></div>
         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
@@ -76,15 +79,21 @@ export default function Features() {
             x: [100, 150, 200, 250, 200, 150, 100],
             y: [100, 150, 120, 180, 150, 120, 100],
           }}
-          transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" }}
+          transition={{
+            duration: 5,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+          }}
         >
           <MousePointer2 className="h-5 w-5 text-blue-500" />
         </motion.div>
       </div>
-
     </div>,
 
-    <div key="templates" className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-4 h-full">
+    <div
+      key="templates"
+      className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-4 h-full"
+    >
       <div className="grid grid-cols-2 gap-4 h-[300px]">
         <div className="space-y-4">
           <div className="h-40 bg-purple-100 dark:bg-purple-900/30 rounded-lg relative overflow-hidden">
@@ -123,13 +132,20 @@ export default function Features() {
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-purple-500 text-white rounded-lg flex items-center justify-center text-lg font-bold"
         initial={{ scale: 0, rotate: 0 }}
         animate={{ scale: [0, 1.2, 1], rotate: [0, 10, 0] }}
-        transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, repeatDelay: 4 }}
+        transition={{
+          duration: 1,
+          repeat: Number.POSITIVE_INFINITY,
+          repeatDelay: 4,
+        }}
       >
         <Palette className="h-10 w-10" />
       </motion.div>
     </div>,
 
-    <div key="preview" className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-4 h-full">
+    <div
+      key="preview"
+      className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-4 h-full"
+    >
       <div className="flex h-[300px]">
         <div className="w-1/2 border-r border-gray-200 dark:border-gray-800 p-2">
           <div className="h-full bg-gray-100 dark:bg-gray-800 rounded relative overflow-hidden">
@@ -171,9 +187,13 @@ export default function Features() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           animate={{ y: [0, -5, 0] }}
-          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, repeatDelay: 2 }}
+          transition={{
+            duration: 1,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatDelay: 2,
+          }}
         >
-          <span>Deploy Now</span>
+          <span>Publish Now</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -191,10 +211,10 @@ export default function Features() {
         </motion.div>
       </div>
     </div>,
-  ]
+  ];
 
   return (
-    <section id="features" className="py-20 bg-gray-50 rounded-2xl dark:bg-zinc-950 max-w-7xl mx-auto">
+    <section id="features" className="py-20 bg-background max-w-7xl mx-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={container}
@@ -203,12 +223,18 @@ export default function Features() {
           viewport={{ once: true, margin: "-100px" }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <motion.h2 variants={item} className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-            No Developers Needed — Just Drag, Drop & Deploy
+          <motion.h2
+            variants={item}
+            className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white"
+          >
+            No Developers Needed — Just Drag, Drop & Publish
           </motion.h2>
-          <motion.p variants={item} className="text-xl text-gray-600 dark:text-gray-400">
-            Our intuitive visual builder makes it easy to create stunning websites without writing a single line of
-            code.
+          <motion.p
+            variants={item}
+            className="text-xl text-gray-600 dark:text-gray-400"
+          >
+            Our intuitive visual builder makes it easy to create stunning
+            websites without writing a single line of code.
           </motion.p>
         </motion.div>
 
@@ -223,18 +249,27 @@ export default function Features() {
             {features.map((feature, index) => (
               <motion.div
                 key={index}
-                className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${activeFeature === index
-                  ? `${feature.bgColor} border-2 border-${feature.color.split("-")[1]}-500`
-                  : "bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-800 hover:shadow-md"
-                  }`}
+                className={`p-6 rounded-xl cursor-pointer transition-all duration-300 ${
+                  activeFeature === index
+                    ? `${feature.bgColor} border-2 border-${
+                        feature.color.split("-")[1]
+                      }-500`
+                    : "bg-white dark:bg-zinc-900 border border-gray-200 dark:border-gray-800 hover:shadow-md"
+                }`}
                 whileHover={{ y: -5 }}
                 onClick={() => setActiveFeature(index)}
               >
-                <div className={`p-3 rounded-lg ${feature.bgColor} ${feature.color} inline-block mb-4`}>
+                <div
+                  className={`p-3 rounded-lg ${feature.bgColor} ${feature.color} inline-block mb-4`}
+                >
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
+                <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -260,5 +295,5 @@ export default function Features() {
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Lock, Shield, Globe } from "lucide-react"
+import { motion } from "framer-motion";
+import { Lock, Shield, Globe } from "lucide-react";
 
 export default function Decentralized() {
   const features = [
@@ -15,7 +15,7 @@ export default function Decentralized() {
     },
     {
       icon: <Shield className="h-6 w-6" />,
-      title: "Tamper-proof Deployment",
+      title: "Tamper-proof Publishment",
       description:
         "Once deployed, your website is secured by blockchain technology, making it resistant to tampering and censorship.",
       color: "text-blue-500",
@@ -29,10 +29,10 @@ export default function Decentralized() {
       color: "text-green-500",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
-  ]
+  ];
 
   return (
-    <section className="py-20 bg-gray-50 dark:bg-zinc-950 max-w-7xl mx-auto rounded-2xl">
+    <section className="py-20 bg-background max-w-7xl mx-auto rounded-2xl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -45,8 +45,9 @@ export default function Decentralized() {
             Truly Decentralized. Fully Yours.
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Every website you publish is stored on-chain using smart canisters—no third-party hosting, no central
-            servers. You control your content, your access, your future.
+            Every website you publish is stored on-chain using smart
+            canisters—no third-party hosting, no central servers. You control
+            your content, your access, your future.
           </p>
         </motion.div>
 
@@ -67,8 +68,12 @@ export default function Decentralized() {
               >
                 {feature.icon}
               </motion.div>
-              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400">{feature.description}</p>
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                {feature.description}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -88,12 +93,15 @@ export default function Decentralized() {
                   Blockchain-Powered Web Hosting
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Traditional web hosting relies on centralized servers that can go down, be censored, or suddenly
-                  change pricing. With our platform, your website lives on the Internet Computer blockchain, giving you
-                  true ownership and permanence.
+                  Traditional web hosting relies on centralized servers that can
+                  go down, be censored, or suddenly change pricing. With our
+                  platform, your website lives on the Internet Computer
+                  blockchain, giving you true ownership and permanence.
                 </p>
                 <div className="flex items-center space-x-2 text-blue-500">
-                  <span className="font-medium">Learn more about Internet Computer</span>
+                  <span className="font-medium">
+                    Learn more about Internet Computer
+                  </span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -142,5 +150,5 @@ export default function Decentralized() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

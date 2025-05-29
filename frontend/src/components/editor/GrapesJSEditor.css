@@ -1,11 +1,13 @@
 
 /* file: custom-theme.css */
-.gjs-one-bg        { background:#1f2937 !important; } /* abu tua */
-.gjs-two-bg        { background:#374151 !important; }
-.gjs-three-bg      { background:#2563eb !important; } /* aksen biru */
+.gjs-one-bg        { background:#262627 !important; } /* abu tua */
+.gjs-two-bg        { background:#262627 !important; }
+.gjs-three-bg      { background:#0f94e5 !important; } /* aksen biru */
 .gjs-one-color     { color:#f9fafb !important; }      /* teks terang */
 .gjs-two-color     { color:#d1d5db !important; }
-
+.gjs-tertiary-color  { background:#0f94e5 !important; }
+.gjs-quaternary-color  { background:#0f94e5 !important; }
+.gpjs-four-color    { color:#0f94e5 !important; } /* teks terang */
 
 
 

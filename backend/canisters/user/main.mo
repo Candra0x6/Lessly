@@ -27,7 +27,7 @@ actor UserManagement {
 
   /// Create a new user
   /// Returns the new user record or an error message
-  public shared (msg) func createUser(username : Text, email : Text) : async Result.Result<User, Text> {
+  public shared (msg) func createUser(username : Text) : async Result.Result<User, Text> {
     let caller = msg.caller;
 
     // Check if user already exists
@@ -40,7 +40,6 @@ actor UserManagement {
         let newUser : User = {
           id = caller;
           username = username;
-          email = email;
           created_at = now;
           updated_at = now;
           subscription_tier = #free;
@@ -80,7 +79,6 @@ actor UserManagement {
         let updatedUser = {
           id = user.id;
           username = user.username;
-          email = user.email;
           created_at = user.created_at;
           updated_at = Time.now();
           subscription_tier = tier;

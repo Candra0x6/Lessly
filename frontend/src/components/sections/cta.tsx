@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 export default function Cta() {
   return (
@@ -104,7 +104,8 @@ export default function Cta() {
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              Own your content. Host your vision. Join the decentralized web revolution.
+              Own your content. Host your vision. Join the decentralized web
+              revolution.
             </motion.p>
 
             <motion.div
@@ -114,11 +115,19 @@ export default function Cta() {
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+              <Button
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-blue-50"
+              >
                 Start Free – No Wallet Needed
               </Button>
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10">
-                Deploy to Web3 in Under 1 Minute
+              <Button
+                onClick={() => (window.location.href = "/auth")}
+                size="lg"
+                variant="outline"
+                className="text-white border-white hover:bg-white/10"
+              >
+                Publish to Web3 in Under 1 Minute
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </motion.div>
@@ -130,11 +139,12 @@ export default function Cta() {
               transition={{ duration: 0.5, delay: 0.4 }}
               viewport={{ once: true }}
             >
-              No credit card required. Free plan available with premium upgrades.
+              No credit card required. Free plan available with premium
+              upgrades.
             </motion.p>
           </div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

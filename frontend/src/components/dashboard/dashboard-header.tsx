@@ -5,7 +5,7 @@ import { Bell, Search, Settings, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Link from "next/link"
+import { Link } from "react-router-dom"
 
 export default function DashboardHeader() {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -15,7 +15,7 @@ export default function DashboardHeader() {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center md:hidden">
+            <Link to="/" className="flex items-center md:hidden">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
