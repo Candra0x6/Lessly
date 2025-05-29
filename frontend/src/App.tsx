@@ -9,7 +9,6 @@ import EditorPage from "./pages/editor/[id]/page";
 import PreviewPage from "./pages/preview/[id]/page";
 import DashboardPage from "./pages/dashboard/page";
 
-import { backend } from "@declarations/backend";
 import LandingPage from "./pages/page";
 import AuthPage from "./pages/auth/page";
 import RegisterPage from "./pages/auth/register/page";
@@ -139,6 +138,7 @@ const App: React.FC = () => {
     const checkIfRegistered = async () => {
       if (isAuthenticated && principal) {
         try {
+          const backend = useAuth().authActor;
           // @ts-ignore
           const result = await backend.getUserByPrincipal(principal);
           result ? setIsRegistered(true) : setIsRegistered(false);
