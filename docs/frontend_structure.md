@@ -1,127 +1,336 @@
-# Lessly Frontend Structure
+# Frontend Structure
 
-This document outlines the structure of the Lessly platform frontend, including the organization of components, pages, and state management.
+## Overview
 
-## Directory Structure
+The Lessly frontend is a modern React application built with TypeScript, Vite, and Tailwind CSS. It follows a component-based architecture with clear separation of concerns and modular design patterns.
 
-```
-frontend/
-├── src/
-│   ├── assets/            # Static assets like images and icons
-│   ├── components/        # Reusable UI components
-│   │   ├── auth/          # Authentication-related components
-│   │   ├── dashboard/     # Dashboard components
-│   │   ├── editor/        # Website editor components
-│   │   ├── layouts/       # Layout components (headers, footers, etc.)
-│   │   └── ui/            # Basic UI components (buttons, inputs, etc.)
-│   ├── hooks/             # Custom React hooks
-│   │   ├── useProjectManagement.ts
-│   │   ├── useUserManagement.ts
-│   │   ├── useWebsiteRenderer.ts
-│   │   └── useWebsiteStorage.ts
-│   ├── lib/               # Utility functions and libraries
-│   │   └── utils.ts
-│   ├── pages/             # Top-level page components
-│   │   ├── auth/          # Authentication pages
-│   │   ├── dashboard/     # Dashboard-related pages
-│   │   ├── editor/        # Website editor pages
-│   │   ├── preview/       # Website preview pages
-│   │   ├── settings/      # User and project settings pages
-│   │   └── templates/     # Template selection pages
-│   ├── types/             # TypeScript type definitions
-│   │   └── type.ts
-│   └── utility/           # Utility files for authentication and actor creation
-│       ├── ProtectedRoute.tsx
-│       ├── RegistrationContext.tsx
-│       ├── use-auth-client.tsx
-│       └── actors/        # Internet Computer actor creation utilities
-│           ├── projectManagementActor.ts
-│           ├── userManagementActor.ts
-│           ├── websiteRenderActor.ts
-│           └── websiteStorageActor.ts
-├── App.tsx                # Main application component with routing
-└── main.tsx               # Entry point for the React application
-```
+## Technology Stack
 
-## Core Architecture
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and optimized builds
+- **Styling**: Tailwind CSS for utility-first styling
+- **UI Components**: Custom component library with shadcn/ui integration
+- **State Management**: React hooks and context patterns
+- **Authentication**: Internet Identity integration via IC agents
 
-The frontend architecture follows these key principles:
-
-1. **Component-Based Design**: UI is broken down into reusable components
-2. **Page-Level Organization**: Top-level pages serve as containers for components
-3. **Custom Hooks for Backend**: Each canister has a corresponding hook for easy access
-4. **Protected Routes**: Authentication-based route protection
-5. **TypeScript**: Strong typing throughout the application
-
-## Frontend-Backend Integration
-
-The frontend interacts with the backend canisters through actor interfaces:
-
-- **userManagementActor**: Authentication and user profile management
-- **projectManagementActor**: Project creation and management
-- **websiteStorageActor**: Asset upload and management
-- **websiteRenderActor**: Website previews and domain management
-
-Each actor is wrapped in a custom React hook to simplify usage in components.
-
-## Routing Structure
+## Project Structure
 
 ```
-/                           # Landing page for unauthenticated users
-/auth/login                 # Internet Identity login
-/dashboard                  # User's project dashboard
-/create-project             # Project creation page
-/editor/:projectId          # GrapesJS website editor
-/preview/:projectId         # Website preview page
-/settings/account           # User account settings
-/settings/project/:projectId # Project settings
-/templates                  # Website template selection
+frontend/src/
+├── App.tsx                 # Root application component
+├── main.tsx               # Application entry point
+├── assets/                # Static assets
+│   ├── logo.svg          # Lessly brand logo
+│   └── profile-pic.jpeg  # Default profile picture
+├── components/            # Reusable UI components
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility libraries
+├── pages/                # Application routes/pages
+├── types/                # TypeScript type definitions
+└── utility/              # Utility components and contexts
 ```
 
-## State Management
+## Component Architecture
 
-The application uses several methods for state management:
+### Core Components (`/components`)
 
-1. **React Context**: For global state (authentication, registration context)
-2. **Custom Hooks**: For canister interactions and derived state
-3. **Local Component State**: For UI-specific state
-4. **URL Parameters**: For navigation and state persistence between page loads
+#### Analytics Components (`/analytics`)
+- `analytics-summary.tsx` - Overview dashboard for website analytics
+- `charts.tsx` - Data visualization components for metrics
+- `data-table.tsx` - Tabular data presentation for analytics
+- `date-range-picker.tsx` - Date selection for analytics filtering
 
-## Authentication Flow
+*Available for Premium and Business subscription tiers*
 
-The authentication flow uses Internet Identity:
+#### Asset Management (`/assets`)
+Components for managing website files and media assets:
+- File upload interfaces
+- Asset browser and organizer
+- Image optimization tools
+- Media library management
 
-1. User navigates to `/auth/login`
-2. Authentication is handled by the Internet Identity service
-3. Upon successful authentication:
-   - If the user is new, they are directed to complete registration
-   - If the user is returning, they are redirected to the dashboard
-4. Protected routes check authentication status before rendering
+#### Authentication (`/auth`)
+Authentication flow components:
+- Login/logout interfaces
+- Internet Identity integration
+- User registration flows
+- Session management
 
-## UI Component Library
+#### Project Creation (`/create-project`)
+Project setup and initialization components:
+- Project creation wizards
+- Template selection interfaces
+- Initial configuration forms
+- Project settings management
 
-The UI is built using a combination of:
+#### Dashboard (`/dashboard`)
+Main application dashboard components:
+- Project overview cards
+- Quick action buttons
+- Recent activity feeds
+- Statistics summaries
 
-1. **Tailwind CSS**: For styling and responsive design
-2. **Custom UI Components**: Built from scratch with accessibility in mind
-3. **GrapesJS**: Integrated as the website builder interface
+#### Dropdown Components (`/dropdown`)
+Reusable dropdown UI elements:
+- Menu dropdowns
+- Selection dropdowns
+- Action menus
+- Context menus
 
-## Build and Deployment
+#### Website Editor (`/editor`)
+Core website building interface:
+- Visual drag-and-drop editor
+- Code editor integration
+- Component palette
+- Property panels
+- Preview modes
 
-The frontend is built using:
+#### KokonutUI (`/kokonutui`)
+Custom UI component library:
+- Base UI components
+- Design system elements
+- Reusable interface patterns
+- Styled components
 
-1. **Vite**: For fast development and optimized production builds
-2. **React**: As the core UI library
-3. **TypeScript**: For type safety
-4. **dfx**: For deployment to the Internet Computer
+#### Layout Components (`/layout`)
+Application layout and structure:
+- Header/navigation components
+- Sidebar components
+- Footer components
+- Page layout wrappers
 
-Frontend assets are served from an asset canister on the Internet Computer.
+#### Section Components (`/sections`)
+Page section building blocks:
+- Hero sections
+- Content blocks
+- Call-to-action sections
+- Feature showcases
 
-## Error Handling
+#### Template Components (`/templates`)
+Website template system:
+- Template galleries
+- Template previews
+- Template customization interfaces
+- Template categories
 
-The application implements a multi-layered error handling approach:
+#### Base UI Components (`/ui`)
+Fundamental UI building blocks:
+- Buttons, inputs, forms
+- Modal dialogs
+- Loading indicators
+- Typography components
 
-1. **Try/Catch Blocks**: For async operations
-2. **Error Boundaries**: For component-level errors
-3. **User Feedback**: Toast notifications and error messages
-4. **Logging**: Console logging in development, silent in production
+### Custom Hooks (`/hooks`)
+
+The application uses three primary custom hooks that interface with the backend canisters:
+
+#### `useUserManagement.ts`
+Manages user authentication and profile operations:
+```typescript
+// User authentication state
+// Profile management functions
+// Subscription tier handling
+// Internet Identity integration
+```
+
+#### `useProjectManagement.ts`
+Handles project-related operations:
+```typescript
+// Project CRUD operations
+// Version control management
+// Collaboration features
+// Publishing controls
+```
+
+#### `useWebsiteStorage.ts`
+Manages asset storage and retrieval:
+```typescript
+// File upload/download
+// Asset metadata management
+// Chunked file handling
+// Project asset organization
+```
+
+### Utility Libraries (`/lib`)
+
+#### `types.ts`
+TypeScript type definitions for:
+- API response types
+- Component prop types
+- State management types
+- Form validation schemas
+
+#### `utils.ts`
+Common utility functions:
+- Data formatting helpers
+- Validation functions
+- API request utilities
+- State management helpers
+
+## Page Structure (`/pages`)
+
+### Core Application Pages
+
+#### Authentication Pages (`/auth`)
+- Login page with Internet Identity
+- Registration/onboarding flows
+- Account verification
+- Password reset (if applicable)
+
+#### Dashboard Pages (`/dashboard`)
+- Main dashboard overview
+- Project management interface
+- User profile settings
+- Subscription management
+
+#### Website Editor (`/editor`)
+- Visual website editor interface
+- Code editor mode
+- Component library
+- Preview modes
+- Publishing tools
+
+#### Project Management (`/project-details`)
+- Individual project overview
+- Project settings and configuration
+- Collaboration management
+- Version history
+- Publishing controls
+
+#### Asset Management (`/assets`)
+- Media library interface
+- File upload/management
+- Asset organization
+- Optimization tools
+
+#### Analytics (`/analytics`)
+- Website traffic analytics
+- Performance metrics
+- User behavior insights
+- Custom report generation
+
+*Premium and Business tiers only*
+
+#### Preview System (`/preview`)
+- Website preview interface
+- Responsive design testing
+- Cross-browser preview
+- Mobile/tablet preview modes
+
+#### Settings (`/settings`)
+- User account settings
+- Notification preferences
+- Billing and subscription
+- API key management
+
+#### Public Site (`/site`)
+- Marketing/landing pages
+- Documentation
+- Pricing information
+- About pages
+
+### Error and Utility Pages
+
+- `403.tsx` - Access denied page
+- `error.tsx` - General error handling
+- `maintenance.tsx` - Maintenance mode page
+- `not-found.tsx` - 404 error page
+- `layout.tsx` - Common page layout
+- `page.tsx` - Default page component
+- `globals.css` - Global styles
+
+## Utility Components (`/utility`)
+
+### Authentication & Authorization
+
+#### `ProtectedRoute.tsx`
+Route protection component:
+- Checks user authentication status
+- Redirects unauthorized users
+- Handles subscription tier access
+- Manages loading states
+
+#### `use-auth-client.tsx`
+Internet Identity authentication hook:
+- IC agent initialization
+- Authentication state management
+- Login/logout functionality
+- Session persistence
+
+#### `RegistrationContext.tsx`
+User onboarding context:
+- Registration flow state
+- Multi-step form management
+- User preference collection
+- Initial setup processes
+
+### IC Integration (`/actors`)
+Internet Computer actor implementations:
+- Canister interface definitions
+- API call wrappers
+- Error handling utilities
+- Type-safe canister communication
+
+## State Management Strategy
+
+### Local State
+- Component-level state with React hooks
+- Form state management
+- UI interaction state
+
+### Global State
+- User authentication context
+- Application settings
+- Theme and preferences
+
+### Server State
+- Custom hooks for API integration
+- Caching strategies for performance
+- Optimistic updates for better UX
+
+## Styling Architecture
+
+### Tailwind CSS
+- Utility-first CSS framework
+- Custom design system configuration
+- Responsive design utilities
+- Dark/light theme support
+
+### Component Styling
+- Styled components with Tailwind classes
+- CSS modules for complex components
+- Theme variables for consistency
+- Responsive design patterns
+
+## Development Workflow
+
+### Build System
+- Vite for fast development builds
+- Hot module replacement (HMR)
+- TypeScript compilation
+- Asset optimization
+
+### Development Server
+- Local development with hot reload
+- API proxy for canister integration
+- Environment variable management
+- Development tools integration
+
+## Performance Optimizations
+
+### Code Splitting
+- Route-based code splitting
+- Component lazy loading
+- Dynamic imports for large components
+
+### Asset Optimization
+- Image optimization and lazy loading
+- Bundle size optimization
+- Tree shaking for unused code
+- Progressive web app features
+
+### Caching Strategies
+- Browser caching for static assets
+- API response caching
+- Service worker implementation
+- Offline functionality support

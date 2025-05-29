@@ -299,3 +299,282 @@ Benefits of this architecture:
 - **Security**: Access controls at canister boundaries prevent unauthorized operations
 - **Maintainability**: Canister upgrades can happen independently
 - **Resilience**: Failures in one canister don't necessarily affect others
+
+# Canister Flow Documentation
+
+## Overview
+
+This document describes the data flow and interaction patterns between Lessly's three main canisters: User Management, Project Management, and Website Storage. All interactions are based on the actual Motoko implementation.
+
+## Authentication Flow
+
+### User Registration and Login
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant II as Internet Identity
+    participant UserCanister
+    
+    User->>Frontend: Access application
+    Frontend->>II: Initiate authentication
+    II->>User: Present authentication challenge
+    User->>II: Complete authentication
+    II->>Frontend: Return principal + delegation
+    Frontend->>UserCanister: createUser(username)
+    UserCanister->>UserCanister: Check if user exists
+    alt User doesn't exist
+        UserCanister->>UserCanister: Create new user record
+        UserCanister->>Frontend: Return new user
+    else User exists
+        UserCanister->>Frontend: Return error "User already exists"
+    end
+```
+
+### Key Implementation Details
+
+- **Principal-based Identity**: Uses IC Principal from message caller for authentication
+- **Duplicate Prevention**: `createUser` checks existing users before creation
+- **Subscription Tiers**: New users default to `#free` tier
+- **Timestamps**: Records creation and update timestamps automatically
+
+## Project Management Flow
+
+### Project Creation
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant ProjectMgmt
+    participant WebStorage
+    
+    User->>Frontend: Create new project
+    Frontend->>ProjectMgmt: createProject(name, description, template_id)
+    ProjectMgmt->>ProjectMgmt: Generate project ID (name + principal)
+    ProjectMgmt->>ProjectMgmt: Create initial version
+    ProjectMgmt->>ProjectMgmt: Store project + version
+    ProjectMgmt->>Frontend: Return project details
+    Frontend->>WebStorage: setProjectAccess(projectId, [owner])
+    WebStorage->>WebStorage: Configure access control
+    WebStorage->>Frontend: Confirm access setup
+```
+
+### Project Access Control
+
+The system implements a multi-layered access control:
+
+1. **Owner Access**: Full control over project settings, collaboration, and publishing
+2. **Collaborator Access**: Edit permissions for project content and assets
+3. **Query Access**: Public read access for published projects
+
+### Version Management
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant ProjectMgmt
+    
+    User->>ProjectMgmt: createVersion(projectId, description)
+    ProjectMgmt->>ProjectMgmt: Verify user access (owner/collaborator)
+    ProjectMgmt->>ProjectMgmt: Generate version ID
+    ProjectMgmt->>ProjectMgmt: Create version record
+    ProjectMgmt->>ProjectMgmt: Update project current_version
+    ProjectMgmt->>User: Return new version
+```
+
+**Version ID Generation**: `"v" + sequenceNumber + "-" + projectId`
+
+## Asset Storage Flow
+
+### File Upload Process
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant WebStorage
+    
+    User->>Frontend: Upload file
+    Frontend->>Frontend: Split file into chunks
+    Frontend->>WebStorage: storeAssetMetadata(project_id, filename, etc.)
+    WebStorage->>WebStorage: Verify project access
+    WebStorage->>WebStorage: Create asset record
+    WebStorage->>Frontend: Return asset metadata
+    
+    loop For each chunk
+        Frontend->>WebStorage: storeAssetChunk(asset_id, index, data)
+        WebStorage->>WebStorage: Verify access + store chunk
+        WebStorage->>Frontend: Confirm chunk stored
+    end
+```
+
+### Asset Retrieval Process
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant WebStorage
+    
+    Client->>WebStorage: getAssetMetadata(asset_id)
+    WebStorage->>Client: Return asset info
+    
+    loop For each chunk
+        Client->>WebStorage: getAssetChunk(asset_id, index)
+        WebStorage->>Client: Return chunk data
+    end
+    
+    Client->>Client: Reassemble file from chunks
+```
+
+### Chunking Strategy
+
+- **Chunk Size**: Configurable based on canister memory constraints
+- **Sequential Storage**: Chunks stored with sequential index numbers
+- **Atomic Operations**: Each chunk stored independently for reliability
+- **Cleanup**: All chunks deleted when asset is removed
+
+## Cross-Canister Integration Patterns
+
+### Project Creation Full Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UserMgmt
+    participant ProjectMgmt
+    participant WebStorage
+    
+    Note over User,WebStorage: Complete project setup flow
+    
+    User->>UserMgmt: Authenticate (get/create user)
+    UserMgmt->>User: Return user profile
+    
+    User->>ProjectMgmt: createProject(name, desc, template)
+    ProjectMgmt->>ProjectMgmt: Create project + initial version
+    ProjectMgmt->>User: Return project details
+    
+    User->>WebStorage: setProjectAccess(projectId, [owner])
+    WebStorage->>User: Confirm access configured
+    
+    Note over User,WebStorage: Project ready for asset uploads
+```
+
+### Publishing Workflow
+
+```mermaid
+sequenceDiagram
+    participant Owner
+    participant ProjectMgmt
+    participant WebStorage
+    participant PublicUser
+    
+    Owner->>ProjectMgmt: publishProject(projectId, true)
+    ProjectMgmt->>ProjectMgmt: Verify ownership
+    ProjectMgmt->>ProjectMgmt: Set published = true
+    ProjectMgmt->>Owner: Confirm published
+    
+    PublicUser->>ProjectMgmt: getProject(projectId)
+    ProjectMgmt->>PublicUser: Return project (if published)
+    
+    PublicUser->>WebStorage: getProjectAssets(projectId)
+    WebStorage->>PublicUser: Return asset list
+    
+    PublicUser->>WebStorage: getAssetChunk(asset_id, index)
+    WebStorage->>PublicUser: Return asset data
+```
+
+## Error Handling Patterns
+
+### Consistent Error Types
+
+All canisters use `Result<T, ErrorType>` pattern:
+
+```motoko
+// Project Management errors
+type ProjectError = {
+    #NotFound;      // Project doesn't exist
+    #Unauthorized;  // User lacks permission
+    #AlreadyExists; // Duplicate project name
+    #InvalidInput;  // Invalid parameters
+};
+
+// User Management errors  
+type AuthError = {
+    #UserNotFound;    // User doesn't exist
+    #Unauthorized;    // Invalid authentication
+    #SessionExpired;  // Session timeout
+};
+
+// Asset Storage errors
+type AssetError = {
+    #NotFound;      // Asset doesn't exist
+    #Unauthorized;  // No access permission
+    #InvalidInput;  // Invalid parameters
+    #StorageFull;   // Storage limit reached
+};
+```
+
+### Error Propagation
+
+1. **Canister Level**: Functions return Result types
+2. **Frontend Level**: Custom hooks handle error states
+3. **UI Level**: Error boundaries and user feedback
+4. **Logging**: Error tracking for debugging
+
+## Performance Optimization Patterns
+
+### Query vs Update Functions
+
+**Query Functions** (Fast, read-only):
+- `getUser()`, `getProject()`, `getUserProjects()`
+- `getAssetMetadata()`, `getProjectAssets()`
+- No consensus required, instant responses
+
+**Update Functions** (Slower, state-changing):
+- `createUser()`, `createProject()`, `updateProject()`
+- `storeAssetMetadata()`, `storeAssetChunk()`
+- Require consensus, modify canister state
+
+### Caching Strategies
+
+1. **Frontend Caching**: Cache query results for performance
+2. **Stable Storage**: Efficient persistence across upgrades
+3. **HashMap Usage**: O(1) lookup performance
+4. **Batch Operations**: Group related operations when possible
+
+## Data Consistency Patterns
+
+### Eventual Consistency
+
+- Cross-canister operations may have slight delays
+- Frontend handles loading states during operations
+- Retry mechanisms for failed operations
+
+### Transaction-like Patterns
+
+While ICP doesn't have traditional transactions, the system ensures consistency through:
+
+1. **Atomic Operations**: Single-canister operations are atomic
+2. **Compensation**: Rollback mechanisms for failed multi-step operations
+3. **Validation**: Pre-flight checks before state changes
+4. **Idempotency**: Safe operation retry patterns
+
+## Monitoring and Observability
+
+### Canister Metrics
+
+- **Storage Usage**: Monitor HashMap sizes and stable storage
+- **Function Calls**: Track query vs update function usage
+- **Error Rates**: Monitor error frequencies by type
+- **Performance**: Measure function execution times
+
+### Health Checks
+
+- Regular canister status verification
+- Cross-canister communication validation
+- Data integrity checks
+- Storage capacity monitoring
+
+This flow documentation reflects the actual implementation in the Motoko canisters and provides a comprehensive understanding of how data moves through the Lessly system.

@@ -1,57 +1,133 @@
-# Lessly - Web3 Website Builder
+# Lessly
 
-Lessly is a decentralized website building and hosting platform built on the Internet Computer Protocol (ICP). It allows users to create, manage, and publish websites with custom domains in a fully decentralized manner.
+<p align="center">
+  <img src="frontend/src/assets/logo.svg" alt="Lessly Logo" width="200"/>
+</p>
 
-## Architecture
+Lessly is a decentralized website builder platform running on the Internet Computer Protocol (ICP). It enables users to create, manage, and publish websites directly on the blockchain, offering true ownership, censorship resistance, and seamless deployment.
 
-The platform is built using the Motoko programming language and is divided into four main canisters:
+## 🌟 Features
 
-- **UserManagement**: Handles user registration, authentication, and subscription management
-- **ProjectManagement**: Manages website projects and their versions
-- **WebsiteStorage**: Stores and manages website assets (HTML, CSS, JS, images, etc.)
-- **WebsiteRenderer**: Renders websites to visitors and handles HTTP requests
+### 📝 Project Management
+- Create and manage multiple website projects
+- Version control system for tracking changes
+- Collaborative editing with team members
+- Project templates to jumpstart development
 
-## Documentation
+### 🔐 User Management
+- Secure authentication via Internet Identity
+- Tiered subscription model (Free, Premium, Business)
+- User profiles and permission management
 
-- [System Summary](docs/summary.md): Overview of the system architecture and components
-- [Canister Flow](docs/canister_flow.md): Detailed explanation of the interactions between canisters
+### 💾 Website Storage
+- Decentralized asset storage on the ICP blockchain
+- Support for various asset types (HTML, CSS, JavaScript, images, fonts)
+- Efficient chunking for large file storage
+- Access control for collaborative projects
 
-## Features
-
-- User registration and authentication
-- Project creation and management
-- Version control for websites
-- Chunked asset storage for large files
+### 🚀 Publishing & Deployment
+- One-click publishing to the Internet Computer
 - Custom domain support
-- Streaming of large assets
-- Subscription tiers (free/premium)
+- Built-in analytics (Premium and Business tiers)
+- Automatic versioning and rollback capabilities
 
-## Getting Started
+### 🎨 Website Editor
+- Visual drag-and-drop editor
+- Code editor for advanced customization
+- Real-time preview
+- Responsive design tools
 
-1. Make sure you have the DFINITY SDK (dfx) installed:
-   ```
-   sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+## 🏗️ Architecture
+
+Lessly is built using a modular canister architecture on the Internet Computer:
+
+- **User Canister**: Manages user authentication and subscription tiers
+- **Project Management Canister**: Handles website projects and versioning
+- **Website Storage Canister**: Stores and retrieves website assets
+- **Frontend**: React-based UI with TypeScript and modern web technologies
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- [dfx](https://internetcomputer.org/docs/current/developer-docs/setup/install/) - The Internet Computer SDK
+- [Node.js](https://nodejs.org/) (v16 or later)
+- [mops](https://mops.one/) - Motoko Package Manager
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/lessly.git
+   cd lessly
    ```
 
-2. Start the local development environment:
+2. Install dependencies
+   ```bash
+   npm install
+   mops install
    ```
+
+3. Start the local Internet Computer replica
+   ```bash
    dfx start --background
    ```
 
-3. Deploy the canisters:
-   ```
+4. Deploy the canisters locally
+   ```bash
    dfx deploy
    ```
 
-4. Visit the local frontend:
+5. Open the frontend
+   ```bash
+   npm run dev
    ```
-   npm start
+
+### Deployment to ICP Mainnet
+
+1. Ensure you have ICP tokens and a cycles wallet
+   
+2. Deploy to mainnet
+   ```bash
+   dfx deploy --network ic
    ```
 
-## Development
+## 💡 What We're Proud Of
 
-This project uses the Motoko programming language, which is specifically designed for the Internet Computer. The canisters follow the actor model and leverage orthogonal persistence for state management.
+- **True Decentralization**: Built entirely on the Internet Computer with no reliance on traditional cloud services
+- **Performance**: Optimized asset storage and retrieval for fast website loading
+- **Developer Experience**: Clean architecture with clear separation of concerns
+- **User Experience**: Intuitive interface that makes Web3 accessible to everyone
+- **Scalability**: Designed to handle everything from personal blogs to enterprise websites
 
-## License
+## 📚 Documentation
+
+For more detailed documentation, please refer to the `/docs` directory:
+
+- [Product Requirements Document](docs/prd.md)
+- [Technical Architecture](docs/technical_architecture.md)
+- [Canister Architecture](canister_architecture.md)
+- [Frontend Structure](docs/frontend_structure.md)
+- [User Flow](docs/user_flow.md)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📞 Contact
+
+Project Link: [https://github.com/yourusername/lessly](https://github.com/yourusername/lessly)
+
+---
+
+<p align="center">Built with ❤️ on the Internet Computer</p>

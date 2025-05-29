@@ -1,360 +1,360 @@
-# Lessly User Flow
+# User Flow Documentation
 
-This document outlines the detailed user journeys through the Lessly platform, from registration to website deployment and management. The flows include both user interactions and the system processes that support them.
+## Overview
 
-## User Registration and Authentication
+This document outlines the complete user journeys through the Lessly platform, from initial registration to website publication. All flows are based on the actual implementation in the Motoko canisters and React frontend.
 
+## 1. User Registration and Onboarding Flow
+
+### Initial Access
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│    Start    │────►│  Visit      │────►│  Internet   │────►│    User     │
-│             │     │  Platform   │     │  Identity   │     │   Creation  │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Dashboard  │◄────│   Profile   │◄────│ Subscription│◄────│   Welcome   │
-│   Access    │     │   Setup     │     │  Selection  │     │    Page     │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+Landing Page → Internet Identity Authentication → User Registration → Dashboard
 ```
 
-### Step-by-Step Process:
+**Step-by-Step Process:**
 
-1. **Initial Visit**
-   - User navigates to the Lessly platform
-   - User is presented with an overview of the platform and login options
+1. **Landing Page Access**
+   - User visits Lessly platform
+   - Presented with login/register options
+   - Marketing content explains platform benefits
 
-2. **Authentication**
-   - User clicks "Sign In" or "Register"
-   - User is directed to Internet Identity authentication
-   - User authenticates with their Internet Identity or creates a new one
-   - System receives authentication confirmation from Internet Identity
+2. **Internet Identity Authentication**
+   - User clicks "Login with Internet Identity"
+   - Redirected to Internet Identity service
+   - Completes biometric or device-based authentication
+   - Returns to Lessly with authenticated principal
 
 3. **User Profile Creation**
-   - First-time users are prompted to create a profile
-   - User enters username and email address
-   - User Management canister creates and stores the user profile
-   - System assigns default Free tier to new users
+   - Frontend calls `createUser(username)` on User Management canister
+   - System checks if user already exists based on principal
+   - If new user: creates profile with `#free` subscription tier
+   - If existing user: retrieves existing profile
 
-4. **Dashboard Access**
-   - User is directed to their personal dashboard
-   - System displays available projects (empty for new users)
-   - User is presented with subscription tier information and platform capabilities
+4. **Onboarding Experience**
+   - Welcome tutorial explaining key features
+   - Optional project creation walkthrough
+   - Subscription tier explanation and upgrade options
 
-## Website Creation
+**Frontend Components Involved:**
+- `/pages/auth/` - Authentication pages
+- `/utility/use-auth-client.tsx` - IC authentication hook
+- `/utility/RegistrationContext.tsx` - Onboarding flow management
+- `/hooks/useUserManagement.ts` - User canister interface
 
+## 2. Project Creation Flow
+
+### From Dashboard to Live Website
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Dashboard  │────►│ "New Project"│────►│  Project    │────►│  Template   │
-│             │     │   Button     │     │   Details   │     │  Selection  │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Website   │◄────│   GrapesJS  │◄────│  Editor     │◄────│  Project    │
-│   Preview   │     │   Designer  │     │   Loading   │     │  Creation   │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+Dashboard → Create Project → Template Selection → Project Setup → Asset Upload → Publishing
 ```
 
-### Step-by-Step Process:
+**Detailed Steps:**
 
 1. **Project Initiation**
-   - From dashboard, user clicks "New Project" button
+   - User navigates to dashboard
+   - Clicks "Create New Project" button
+   - Presented with project creation form
+
+2. **Project Configuration**
    - User enters project name and description
-   - User selects subscription tier for the project (based on their account tier)
+   - Optional template selection from available templates
+   - Frontend validates input data
 
-2. **Template Selection**
-   - User browses available website templates
-   - Templates are filtered based on user's subscription tier
-   - User selects desired template or opts for a blank canvas
+3. **Project Creation Backend Call**
+   ```typescript
+   // Frontend hook usage
+   const { createProject } = useProjectManagement();
+   const result = await createProject(name, description, templateId);
+   ```
+   - Calls `createProject()` on Project Management canister
+   - System generates unique project ID: `name + "-" + principal`
+   - Creates initial version: `"v1-" + projectId`
+   - Sets up project metadata with owner permissions
 
-3. **Project Creation**
-   - System calls Project Management canister to create project record
-   - Project Management canister generates unique project ID 
-   - Project Management creates initial version (v1)
-   - Website Storage canister is configured for project assets
+4. **Access Control Setup**
+   - Frontend calls `setProjectAccess()` on Website Storage canister
+   - Configures owner access for asset management
+   - Establishes project permissions for file uploads
 
-4. **Editor Access**
-   - GrapesJS editor loads with selected template or blank canvas
-   - Editor displays responsive preview options (desktop, tablet, mobile)
-   - Asset library becomes available for the user's content
+5. **Project Dashboard**
+   - User redirected to project-specific dashboard
+   - Shows project metadata, version history
+   - Provides access to editor, settings, and publishing controls
 
-## Website Design and Editing
+**Frontend Components Involved:**
+- `/components/create-project/` - Project creation components
+- `/pages/dashboard/` - Main dashboard interface
+- `/pages/project-details/` - Individual project management
+- `/hooks/useProjectManagement.ts` - Project canister interface
 
+## 3. Website Building Flow
+
+### Content Creation and Asset Management
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  GrapesJS   │────►│  Component  │────►│   Style     │────►│   Content   │
-│   Editor    │     │   Dragging  │     │  Adjustment │     │   Editing   │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│    Save     │◄────│  Responsive │◄────│   Asset     │◄────│    Code     │
-│   Changes   │     │   Testing   │     │  Uploading  │     │   Editing   │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-```
-
-### Step-by-Step Process:
-
-1. **Visual Editing**
-   - User drags components from the sidebar onto the canvas
-   - Components include text blocks, images, buttons, forms, and layout elements
-   - User arranges components using drag-and-drop
-   - User adjusts styling via the properties panel
-
-2. **Content Management**
-   - User adds and edits text content
-   - User uploads images and other media assets
-   - System processes uploads in chunks for efficient storage
-   - Uploads are stored in Website Storage canister with metadata
-
-3. **Advanced Editing**
-   - Advanced users can access HTML/CSS editor
-   - Custom code can be added through the code editor panel
-   - Changes are reflected in real-time in the visual editor
-
-4. **Responsive Design**
-   - User toggles between desktop, tablet, and mobile views
-   - User adjusts responsive breakpoints and styling
-   - System ensures cross-device compatibility
-
-5. **Saving Work**
-   - User clicks "Save" button to store current progress
-   - System asynchronously uploads changes to Website Storage canister
-   - Project version is updated with timestamp
-
-## Website Publishing and Deployment
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Completed  │────►│  Preview    │────►│  "Publish"  │────►│  Version    │
-│   Design    │     │   Website   │     │   Button    │     │  Creation   │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│    Share    │◄────│   Domain    │◄────│  Deployment │◄────│   Asset     │
-│   Options   │     │   Setup     │     │ Confirmation│     │ Processing  │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+Project Dashboard → Editor → Content Creation → Asset Upload → Preview → Save Version
 ```
 
-### Step-by-Step Process:
+**Editor Experience:**
 
-1. **Pre-Deployment Preview**
-   - User clicks "Preview" to see the website as visitors will
-   - Preview displays website in a new tab with temporary URL
-   - User can navigate through pages to verify functionality
+1. **Editor Access**
+   - User clicks "Edit Website" from project dashboard
+   - Loads website editor interface
+   - Displays current project version content
 
-2. **Publishing Decision**
-   - After reviewing preview, user clicks "Publish" button
-   - System displays confirmation dialog with publishing options
-   - User selects whether to create new version or update current
+2. **Content Creation Options**
+   - **Visual Editor**: Drag-and-drop interface for non-technical users
+   - **Code Editor**: Direct HTML/CSS/JavaScript editing
+   - **Component Library**: Pre-built sections and elements
+   - **Template Customization**: Modify selected templates
 
-3. **Asset Processing**
-   - System finalizes all assets and prepares them for deployment
-   - Assets are chunked if necessary for efficient storage
-   - All assets are tagged with appropriate version ID
-   - Website Storage canister confirms all assets are properly stored
+3. **Asset Management**
+   - **File Upload Process**:
+     ```typescript
+     // Asset upload with chunking
+     const { uploadAsset } = useWebsiteStorage();
+     const result = await uploadAsset(file, projectId, versionId);
+     ```
+   - Large files automatically split into chunks
+   - Each chunk uploaded via `storeAssetChunk()`
+   - Asset metadata stored via `storeAssetMetadata()`
+   - Supports HTML, CSS, JavaScript, images, fonts
 
-4. **Deployment**
-   - Project Management canister marks the project as published
-   - Project Management updates current version reference if necessary
-   - Website Renderer canister is notified of newly published content
-   - System generates a unique URL for the website (e.g., project-id.ic0.app)
+4. **Real-time Preview**
+   - Live preview of changes as user edits
+   - Responsive design testing (mobile, tablet, desktop)
+   - Cross-browser compatibility preview
 
-5. **Domain Configuration**
-   - User can optionally set up custom domain
-   - System provides DNS configuration instructions 
-   - User updates DNS records with their domain registrar
-   - Website Renderer canister associates domain with project
+5. **Version Control**
+   - Auto-save functionality for work in progress
+   - Manual version creation with descriptions
+   - Ability to revert to previous versions
+   - Version comparison tools
 
-6. **Sharing**
-   - System displays success message with website URL
-   - User is provided with sharing options (social media, email, etc.)
-   - Analytics tracking is initialized for the published website
+**Frontend Components Involved:**
+- `/components/editor/` - Website editor interface
+- `/components/assets/` - Asset management components
+- `/pages/editor/` - Editor page layouts
+- `/pages/preview/` - Preview functionality
+- `/hooks/useWebsiteStorage.ts` - Storage canister interface
 
-## Website Management and Updates
+## 4. Collaboration Flow (Owner + Collaborators)
 
+### Multi-User Project Management
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Dashboard  │────►│   Project   │────►│  "Edit"     │────►│   Editor    │
-│             │     │    List     │     │   Button    │     │   Loading   │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Publish    │◄────│   Save      │◄────│   Make      │◄────│  Existing   │
-│  Updates    │     │  Changes    │     │  Changes    │     │  Website    │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-```
-
-### Step-by-Step Process:
-
-1. **Project Selection**
-   - User navigates to dashboard and views project list
-   - System displays projects with status (published/draft)
-   - User selects the project they wish to edit
-
-2. **Editor Access**
-   - User clicks "Edit" button for the selected project
-   - System loads the current version of the website in GrapesJS editor
-   - All existing assets and content are retrieved from Website Storage canister
-
-3. **Making Changes**
-   - User modifies content, layout, or styling
-   - Changes are saved periodically to prevent data loss
-   - User can create a new version to preserve the previous state
-
-4. **Publishing Updates**
-   - User clicks "Publish Updates" after completing changes
-   - System provides option to publish immediately or schedule for later
-   - User can add a description of the changes for version history
-
-5. **Deployment of Updates**
-   - System processes changed assets (new, modified, or deleted)
-   - Website Storage canister updates asset records
-   - Project Management canister updates version information
-   - Website Renderer canister begins serving updated content immediately
-
-## Collaboration and Team Management
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Project    │────►│ "Collaborate"│────►│   Invite    │────►│   Email     │
-│  Settings   │     │   Button    │     │ Collaborator│     │  Invitation │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│Collaborator │◄────│ Permission  │◄────│  Accept     │◄────│ Collaboration│
-│  Activity   │     │  Setting    │     │ Invitation  │     │   Notice    │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+Owner Invitation → Collaborator Access → Shared Editing → Version Management
 ```
 
-### Step-by-Step Process:
+**Collaboration Process:**
 
-1. **Initiating Collaboration**
-   - Project owner navigates to project settings
-   - Owner clicks "Collaborate" button 
-   - System displays collaborator management interface
+1. **Collaborator Invitation**
+   - Project owner accesses project settings
+   - Enters collaborator's principal ID or username
+   - System updates project collaborators list
+   - Collaborator receives access notification
 
-2. **Inviting Collaborators**
-   - Owner enters collaborator's email or username
-   - Owner assigns permission level (editor, viewer, admin)
-   - System sends invitation to potential collaborator
+2. **Permission Verification**
+   - All project operations verify user permissions
+   - Owner: Full access to all project functions
+   - Collaborator: Edit access to content and assets
+   - System checks access on every operation
 
-3. **Accepting Invitation**
-   - Collaborator receives email notification
-   - Collaborator clicks link and authenticates with Internet Identity
-   - If not registered, collaborator creates an account
-   - Project appears in collaborator's dashboard with appropriate label
+3. **Collaborative Editing**
+   - Multiple users can work on different aspects
+   - Version control manages concurrent changes
+   - Change attribution tracks who made what modifications
 
-4. **Collaborative Editing**
-   - Multiple team members can access the project
-   - Permissions restrict available actions based on assigned role
-   - Version history tracks which team member made which changes
+4. **Version Management**
+   - Any collaborator can create new versions
+   - Version descriptions include creator information
+   - Owner controls publishing decisions
 
-## Analytics and Performance Monitoring
+**Backend Implementation:**
+```motoko
+// Access control check in Project Management canister
+let isCollaborator = switch (Array.find<UserId>(project.collaborators, func(id) { id == caller })) {
+  case (?_) { true };
+  case null { false };
+};
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Project    │────►│ "Analytics" │────►│  Dashboard  │────►│   Visitor   │
-│  Dashboard  │     │   Button    │     │   Loading   │     │  Overview   │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Export     │◄────│  Custom     │◄────│   Traffic   │◄────│   Page      │
-│  Reports    │     │  Filters    │     │   Sources   │     │  Performance│
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-```
-
-### Step-by-Step Process:
-
-1. **Accessing Analytics**
-   - User navigates to project dashboard
-   - User clicks "Analytics" button for a published project
-   - System loads analytics dashboard with data visualization
-
-2. **Viewing Core Metrics**
-   - User sees visitor count, page views, and engagement metrics
-   - System displays charts for traffic trends over time
-   - Page performance data shows loading times and resource usage
-
-3. **Analyzing Traffic Sources**
-   - User views breakdown of traffic sources (direct, search, social)
-   - Geographic distribution of visitors is displayed
-   - Referral links are tracked and displayed
-
-4. **Custom Analysis**
-   - User can filter data by date range, device type, or location
-   - Custom reports can be configured for specific metrics
-   - Data can be exported for external analysis
-
-## Subscription Management
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   User      │────►│ "Subscription│────►│   Plans     │────►│   Plan      │
-│  Dashboard  │     │    Button   │     │  Comparison │     │  Selection  │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-                                                                   │
-                                                                   ▼
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Access    │◄────│  Payment    │◄────│  Billing    │◄────│  Payment    │
-│New Features │     │Confirmation │     │ Information │     │  Method     │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+if (project.owner != caller and not isCollaborator) {
+  return #err(#Unauthorized);
+};
 ```
 
-### Step-by-Step Process:
+## 5. Website Publishing Flow
 
-1. **Viewing Subscription Options**
-   - User navigates to account settings
-   - User clicks "Subscription" button
-   - System displays available plans with feature comparison
+### From Draft to Live Website
+```
+Final Review → Publish Decision → Domain Configuration → Live Website → Analytics
+```
 
-2. **Upgrading Subscription**
-   - User selects desired subscription tier
-   - System displays price information and billing cycle options
-   - User confirms selection and proceeds to payment
+**Publishing Process:**
 
-3. **Payment Processing**
-   - User enters payment information
-   - System processes payment securely
-   - User Management canister updates subscription status
+1. **Pre-Publication Review**
+   - User reviews website in preview mode
+   - Tests all functionality and links
+   - Verifies responsive design across devices
+   - Checks asset loading and performance
 
-4. **Accessing Premium Features**
-   - User receives confirmation of successful upgrade
-   - System immediately enables access to new features
-   - Dashboard is updated to reflect new capabilities
+2. **Publication Action**
+   - User clicks "Publish Website" button
+   - Frontend calls `publishProject(projectId, true)`
+   - Project Management canister updates `published = true`
+   - Website becomes publicly accessible
 
-## Key Touchpoints and Experience Goals
+3. **Domain Configuration**
+   - **Default**: Website available at IC canister URL
+   - **Custom Domain** (Premium/Business):
+     - User configures custom domain in settings
+     - Receives DNS configuration instructions
+     - Domain mapping configured in Website Renderer
 
-### First-Time User Experience
-- Intuitive onboarding that explains the platform's capabilities
-- Quick time-to-value with template selection
-- Clear guidance on how to create and publish a first website
+4. **Live Website Access**
+   - Public users can access published website
+   - Website Renderer serves content from latest published version
+   - Assets delivered via chunked streaming for performance
 
-### Regular User Workflow
-- Efficient dashboard for managing multiple projects
-- Seamless transition between editing and publishing
-- Real-time feedback on changes and updates
+5. **Post-Publication Management**
+   - **Analytics Tracking** (Premium/Business tiers)
+   - **Performance Monitoring**
+   - **SEO Optimization Tools**
+   - **Update Publishing** for new versions
 
-### Power User Capabilities
-- Advanced customization options through code editing
-- Batch operations for asset management
-- Team collaboration tools for complex projects
-- Detailed analytics for performance optimization
+**Frontend Components Involved:**
+- `/pages/project-details/` - Publishing controls
+- `/pages/settings/` - Domain configuration
+- `/components/analytics/` - Analytics dashboard (Premium/Business)
 
-## System Integration Touchpoints
+## 6. Analytics and Insights Flow (Premium/Business)
 
-Throughout these user flows, the four core canisters work together seamlessly:
+### Data Collection to Actionable Insights
+```
+Website Traffic → Data Collection → Analytics Processing → Dashboard Visualization → Insights
+```
 
-1. **User Management Canister** handles all authentication, profile management, and subscription operations
+**Analytics Experience:**
 
-2. **Project Management Canister** manages project metadata, versioning, and access control
+1. **Data Collection**
+   - Automatic tracking of website visitors
+   - Page view metrics and user behavior
+   - Traffic source identification
+   - Performance metrics collection
 
-3. **Website Storage Canister** handles all asset uploads, storage, and retrieval operations
+2. **Analytics Dashboard Access**
+   - User navigates to Analytics section
+   - Dashboard shows key metrics overview
+   - Date range filtering capabilities
+   - Real-time and historical data
 
-4. **Website Renderer Canister** serves the published websites to visitors and manages domains
+3. **Detailed Reports**
+   - Traffic analytics with source breakdown
+   - User behavior flow analysis
+   - Performance metrics and recommendations
+   - Exportable reports for external analysis
 
-Each user interaction may involve multiple canister operations happening in the background, creating a seamless experience while maintaining the decentralized architecture of the platform.
+4. **Insights and Recommendations**
+   - Automated insights based on data patterns
+   - Performance improvement suggestions
+   - SEO recommendations
+   - Content optimization tips
+
+**Frontend Components Involved:**
+- `/components/analytics/` - Complete analytics suite
+  - `analytics-summary.tsx` - Overview dashboard
+  - `charts.tsx` - Data visualization
+  - `data-table.tsx` - Detailed data tables
+  - `date-range-picker.tsx` - Time period selection
+
+## 7. Subscription Management Flow
+
+### Tier Upgrades and Billing
+```
+Free Tier Usage → Feature Limitations → Upgrade Decision → Payment → Enhanced Features
+```
+
+**Subscription Process:**
+
+1. **Feature Limitation Discovery**
+   - Free tier users encounter feature restrictions
+   - Clear messaging about premium features
+   - Examples: analytics, custom domains, advanced templates
+
+2. **Upgrade Decision**
+   - User accesses subscription settings
+   - Compares tier features and pricing
+   - Selects Premium ($9.99/month) or Business ($29.99/month)
+
+3. **Subscription Update**
+   - Payment processing (external integration)
+   - Backend call to `updateSubscription(tier)`
+   - User Management canister updates subscription tier
+   - Immediate access to new features
+
+4. **Enhanced Feature Access**
+   - Analytics dashboard unlocked
+   - Custom domain configuration available
+   - Advanced templates and tools accessible
+   - Priority support access
+
+## 8. Error Handling and Recovery Flows
+
+### Graceful Error Management
+```
+Operation Attempt → Error Detection → User Feedback → Recovery Options → Resolution
+```
+
+**Error Scenarios and Handling:**
+
+1. **Authentication Errors**
+   - Internet Identity connection issues
+   - Session expiration handling
+   - Automatic re-authentication prompts
+
+2. **Project Access Errors**
+   - Unauthorized access attempts
+   - Clear permission denied messages
+   - Guidance for requesting access
+
+3. **Asset Upload Errors**
+   - File size limitations
+   - Unsupported file types
+   - Network connection issues
+   - Chunked upload failure recovery
+
+4. **Publication Errors**
+   - Missing required assets
+   - Validation failures
+   - Network connectivity issues
+
+**Error Recovery Mechanisms:**
+- Automatic retry for transient failures
+- Clear error messaging with actionable steps
+- Help documentation links
+- Support contact options
+
+## User Experience Principles
+
+### Design Philosophy
+
+1. **Progressive Disclosure**
+   - Simple interfaces for beginners
+   - Advanced features available on demand
+   - Contextual help and guidance
+
+2. **Familiar Patterns**
+   - Traditional website builder UX patterns
+   - Gradual introduction to Web3 concepts
+   - No blockchain complexity exposed to users
+
+3. **Performance Focus**
+   - Fast loading times for all interfaces
+   - Optimistic UI updates where possible
+   - Clear loading states and progress indicators
+
+4. **Accessibility**
+   - WCAG 2.1 compliance across all interfaces
+   - Keyboard navigation support
+   - Screen reader compatibility
+   - High contrast mode support
+
+This user flow documentation reflects the actual implementation capabilities and provides a comprehensive understanding of how users interact with the Lessly platform from registration through website publication and management.

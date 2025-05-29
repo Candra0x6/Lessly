@@ -1,607 +1,221 @@
-# Lessly Technical Architecture
+# Technical Architecture
 
-This document provides a technical perspective on the Lessly platform architecture, including data models, canister interfaces, and communication patterns.
+## Overview
 
-## System Architecture Overview
+Lessly is built on the Internet Computer Protocol (ICP) using a modular canister architecture. The system is designed for scalability, security, and true decentralization, with all data stored on-chain and no reliance on traditional cloud services.
 
-The Lessly platform is built on the Internet Computer Protocol (ICP), using a modular canister design to separate concerns and enable efficient scaling.
+## Backend Architecture
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│                        Frontend Application                        │
-│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐│
-│ │User Dashboard│ │Website Editor│ │Asset Manager │ │Admin Panel   ││
-└─┬─────────────┬┴─┬─────────────┬┴─┬─────────────┬┴─┬─────────────┬┘
-  │             │   │             │   │             │   │             │
-  ▼             ▼   ▼             ▼   ▼             ▼   ▼             ▼
-┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
-│    User    │ │  Project   │ │  Website   │ │  Website   │
-│ Management │ │ Management │ │  Storage   │ │  Renderer  │
-│  Canister  │ │  Canister  │ │  Canister  │ │  Canister  │
-└────────────┘ └────────────┘ └────────────┘ └────────────┘
-       │              │              │              │
-       └──────────────┴──────────────┴──────────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │Internet Computer│
-                    │   Blockchain    │
-                    └─────────────────┘
-```
+### Canister Structure
 
-## Data Models
+The backend consists of three main canisters, each with specific responsibilities:
 
-### User Management Canister
+#### 1. User Management Canister (`user/main.mo`)
 
-```
-type User = {
-  id: Principal;
-  username: Text;
-  email: Text;
-  created_at: Time;
-  updated_at: Time;
-  subscription_tier: SubscriptionTier;
-  principal: Principal;
-};
+**Responsibilities:**
+- User authentication and profile management
+- Subscription tier management
+- Principal-based identity verification
 
-type SubscriptionTier = {
-  #free;
-  #pro;
-  #enterprise;
-};
+**Key Functions:**
+- `createUser(username: Text)` - Creates new user accounts
+- `getUser(userId: UserId)` - Retrieves user profiles (query)
+- `getUserByPrincipal(principal: Principal)` - Gets user by principal ID
+- `updateSubscription(tier: SubscriptionTier)` - Updates user subscription tier
 
-type AuthError = {
-  #UserNotFound;
-  #Unauthorized;
-  #InvalidCredentials;
-};
-```
+**Data Storage:**
+- Users are stored in a HashMap with Principal as the key
+- Stable storage ensures data persistence across upgrades
+- Implements preupgrade/postupgrade hooks for orthogonal persistence
 
-### Project Management Canister
+#### 2. Project Management Canister (`project_management/main.mo`)
 
-```
-type Project = {
-  id: Text;
-  name: Text;
-  owner: Principal;
-  description: Text;
-  created_at: Int;
-  updated_at: Int;
-  published: Bool;
-  url_slug: Text;
-  collaborators: [Principal];
-  current_version: Text;
-  template_id: ?Text;
-};
+**Responsibilities:**
+- Website project creation and management
+- Project versioning system
+- Collaboration and access control
+- Project publishing status
 
-type ProjectVersion = {
-  id: Text;
-  project_id: Text;
-  created_at: Int;
-  created_by: Principal;
-  description: Text;
-};
+**Key Functions:**
+- `createProject(name, description, template_id)` - Creates new website projects
+- `getProject(projectId)` - Retrieves project details (query)
+- `getUserProjects(userId)` - Gets all projects for a user (query)
+- `updateProject(projectId, name, description)` - Updates project metadata
+- `publishProject(projectId, publish)` - Toggles project publication status
+- `createVersion(projectId, description)` - Creates new project versions
+- `getProjectVersions(projectId)` - Retrieves all versions (query)
 
-type ProjectError = {
-  #NotFound;
-  #Unauthorized;
-  #InvalidInput;
-};
-```
+**Data Storage:**
+- Projects stored in HashMap with Text-based project IDs
+- Versions stored separately with linking to parent projects
+- Implements access control for owners and collaborators
 
-### Website Storage Canister
+#### 3. Website Storage Canister (`website_storage/main.mo`)
 
-```
-type Asset = {
-  id: Text;
-  project_id: Text;
-  filename: Text;
-  content_type: Text;
-  size: Nat;
-  created_at: Int;
-  updated_at: Int;
-  version_id: Text;
-  asset_type: AssetType;
-  path: Text;
-};
+**Responsibilities:**
+- Asset storage and retrieval
+- Chunked file upload for large assets
+- Project-based access control
+- Asset versioning and metadata management
 
-type AssetType = {
-  #html;
-  #css;
-  #javascript;
-  #image;
-  #document;
-  #other;
-};
+**Key Functions:**
+- `storeAssetMetadata()` - Stores asset metadata
+- `storeAssetChunk(asset_id, index, data)` - Stores file chunks
+- `getAssetMetadata(asset_id)` - Retrieves asset info (query)
+- `getAssetChunk(asset_id, index)` - Retrieves file chunks (query)
+- `getProjectAssets(project_id)` - Gets all project assets (query)
+- `getVersionAssets(project_id, version_id)` - Gets version-specific assets (query)
+- `deleteAsset(asset_id)` - Removes assets and their chunks
+- `setProjectAccess(project_id, users)` - Configures project access
 
-type Chunk = Blob;
+**Data Storage:**
+- Asset metadata stored in HashMap
+- File content stored as chunks in separate HashMap
+- Project access control list maintained separately
+- Supports large file uploads through chunking mechanism
 
-type AssetError = {
-  #NotFound;
-  #Unauthorized;
-  #InvalidInput;
-  #StorageLimitExceeded;
-};
+### Type System (`types/lib.mo`)
 
-type StoreAssetResult = {
-  #ok: Asset;
-  #err: AssetError;
-};
-```
+The system uses a comprehensive type system that defines:
 
-### Website Renderer Canister
+**Core Types:**
+- `UserId` - Principal-based user identification
+- `ProjectId` - Text-based project identification
+- `VersionId` - Text-based version identification
+- `AssetId` - Text-based asset identification
+
+**Data Structures:**
+- `User` - User profiles with subscription tiers
+- `Project` - Project metadata with ownership and collaboration
+- `ProjectVersion` - Version control information
+- `Asset` - File metadata with content type and versioning
+- `Chunk` - File content chunks for large file support
+
+**Error Types:**
+- `ProjectError` - Project-related error handling
+- `AuthError` - Authentication error handling
+- `AssetError` - Asset storage error handling
+
+**Subscription Tiers:**
+- `#free` - Basic tier with limited features
+- `#premium` - Enhanced tier with analytics
+- `#business` - Full-featured tier for enterprises
+
+## Frontend Architecture
+
+### Technology Stack
+
+- **Framework:** React 18 with TypeScript
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS
+- **UI Components:** Custom component library
+- **State Management:** React hooks and context
+- **Routing:** React Router (inferred from page structure)
+
+### Project Structure
 
 ```
-type HttpRequest = {
-  method: Text;
-  url: Text;
-  headers: [(Text, Text)];
-  body: Blob;
-};
-
-type HttpResponse = {
-  status_code: Nat16;
-  headers: [(Text, Text)];
-  body: Blob;
-  streaming_strategy: ?StreamingStrategy;
-};
-
-type StreamingStrategy = {
-  #Callback: {
-    callback: query (StreamingCallbackToken) -> async StreamingCallbackResponse;
-    token: StreamingCallbackToken;
-  };
-};
-
-type StreamingCallbackToken = {
-  asset_id: Text;
-  chunk_index: Nat;
-  project_id: Text;
-};
-
-type StreamingCallbackResponse = {
-  body: Blob;
-  token: ?StreamingCallbackToken;
-};
-
-type Domain = {
-  name: Text;
-  project_id: Text;
-  created_at: Int;
-};
-
-type RenderError = {
-  #NotFound;
-  #Unauthorized;
-  #AssetError;
-};
+frontend/src/
+├── App.tsx                 # Main application component
+├── main.tsx               # Application entry point
+├── assets/                # Static assets (images, logos)
+├── components/            # Reusable UI components
+│   ├── analytics/         # Analytics dashboard components
+│   ├── assets/           # Asset management components
+│   ├── auth/             # Authentication components
+│   ├── create-project/   # Project creation components
+│   ├── dashboard/        # Dashboard components
+│   ├── dropdown/         # Dropdown UI components
+│   ├── editor/           # Website editor components
+│   ├── kokonutui/        # UI library components
+│   ├── layout/           # Layout components
+│   ├── sections/         # Page section components
+│   ├── templates/        # Project template components
+│   └── ui/               # Base UI components
+├── hooks/                # Custom React hooks
+│   ├── useProjectManagement.ts
+│   ├── useUserManagement.ts
+│   └── useWebsiteStorage.ts
+├── lib/                  # Utility libraries
+│   ├── types.ts         # TypeScript type definitions
+│   └── utils.ts         # Utility functions
+├── pages/                # Application pages/routes
+│   ├── analytics/        # Analytics pages
+│   ├── assets/          # Asset management pages
+│   ├── auth/            # Authentication pages
+│   ├── dashboard/       # Dashboard pages
+│   ├── editor/          # Website editor pages
+│   ├── preview/         # Website preview pages
+│   ├── project-details/ # Project detail pages
+│   ├── settings/        # Settings pages
+│   └── site/            # Public site pages
+├── types/               # TypeScript type definitions
+│   └── type.ts
+└── utility/             # Utility components and contexts
+    ├── ProtectedRoute.tsx
+    ├── RegistrationContext.tsx
+    ├── use-auth-client.tsx
+    └── actors/          # IC actor implementations
 ```
 
-## Canister Interface Definitions
+### Custom Hooks
 
-### User Management Canister
+The application uses three main custom hooks that interface with the backend canisters:
 
-```
-actor UserManagement {
-  // Create a new user profile
-  public shared (msg) func createUser(username: Text, email: Text) 
-    : async Result.Result<User, Text>;
-  
-  // Get user profile by ID
-  public query func getUser(userId: Principal)
-    : async Result.Result<User, AuthError>;
-    
-  // Get user by principal identifier
-  public shared func getUserByPrincipal(principal: Principal)
-    : async ?User;
-  
-  // Update subscription tier
-  public shared (msg) func updateSubscription(tier: SubscriptionTier)
-    : async Result.Result<User, AuthError>;
-}
-```
+1. **useUserManagement** - Interfaces with User Management canister
+2. **useProjectManagement** - Interfaces with Project Management canister
+3. **useWebsiteStorage** - Interfaces with Website Storage canister
 
-### Project Management Canister
+## Security Architecture
 
-```
-actor ProjectManagement {
-  // Create a new project
-  public shared (msg) func createProject(name: Text, description: Text, template_id: ?Text)
-    : async Result.Result<Project, ProjectError>;
-  
-  // Get project by ID
-  public query func getProject(projectId: Text)
-    : async Result.Result<Project, ProjectError>;
-  
-  // Get all projects for a user
-  public query func getUserProjects(userId: Principal)
-    : async [Project];
-  
-  // Update project metadata
-  public shared (msg) func updateProject(projectId: Text, name: ?Text, description: ?Text)
-    : async Result.Result<Project, ProjectError>;
-  
-  // Publish or unpublish a project
-  public shared (msg) func publishProject(projectId: Text, publish: Bool)
-    : async Result.Result<Project, ProjectError>;
-  
-  // Create a new version of a project
-  public shared (msg) func createVersion(projectId: Text, description: Text)
-    : async Result.Result<ProjectVersion, ProjectError>;
-  
-  // Get all versions of a project
-  public query func getProjectVersions(projectId: Text)
-    : async Result.Result<[ProjectVersion], ProjectError>;
-}
-```
+### Authentication
+- Uses Internet Identity for secure, cryptographic authentication
+- Principal-based user identification ensures unique identity
+- No passwords or traditional authentication mechanisms
 
-### Website Storage Canister
+### Authorization
+- Owner-based access control for projects
+- Collaborator system for shared project access
+- Canister-level permission checks for all operations
 
-```
-actor WebsiteStorage {
-  // Configure project access
-  public shared (msg) func setProjectAccess(projectId: Text, users: [Principal])
-    : async Bool;
-  
-  // Store asset metadata
-  public shared (msg) func storeAssetMetadata(
-    project_id: Text,
-    filename: Text,
-    content_type: Text,
-    size: Nat,
-    version_id: Text,
-    asset_type: AssetType,
-    path: Text
-  ) : async Result.Result<Asset, AssetError>;
-  
-  // Store a chunk of asset data
-  public shared (msg) func storeAssetChunk(asset_id: Text, index: Nat, data: Blob)
-    : async Result.Result<(), AssetError>;
-  
-  // Get asset metadata
-  public query func getAssetMetadata(asset_id: Text)
-    : async Result.Result<Asset, AssetError>;
-  
-  // Get a chunk of asset data
-  public query func getAssetChunk(asset_id: Text, index: Nat)
-    : async Result.Result<Blob, AssetError>;
-  
-  // Get all assets for a project
-  public query func getProjectAssets(project_id: Text)
-    : async [Asset];
-  
-  // Get assets for a specific project version
-  public query func getVersionAssets(project_id: Text, version_id: Text)
-    : async [Asset];
-  
-  // Delete an asset
-  public shared (msg) func deleteAsset(asset_id: Text)
-    : async Result.Result<(), AssetError>;
-}
-```
+### Data Integrity
+- All data stored on-chain with cryptographic guarantees
+- Immutable audit trail through version control
+- Stable storage with upgrade-safe persistence
 
-### Website Renderer Canister
+## Scalability Features
 
-```
-actor WebsiteRenderer {
-  // Link a custom domain to a project
-  public shared (msg) func linkDomain(domain_name: Text, project_id: Text)
-    : async Result.Result<Domain, Text>;
-  
-  // HTTP request handler
-  public func http_request(request: HttpRequest)
-    : async HttpResponse;
-  
-  // Streaming callback for large assets
-  public func http_streaming_callback(token: StreamingCallbackToken)
-    : async StreamingCallbackResponse;
-  
-  // Get all domains linked to a project
-  public query func getProjectDomains(project_id: Text)
-    : async [Domain];
-}
-```
+### Storage Optimization
+- Chunked file upload for large assets
+- Efficient HashMap storage with stable memory
+- Lazy loading for large datasets
 
-## Inter-Canister Communication Patterns
+### Canister Scaling
+- Modular canister architecture allows independent scaling
+- Query functions for read-heavy operations
+- Stable storage ensures data persistence during upgrades
 
-### Authentication Flow
-
-```
-┌──────────┐     ┌───────────────┐     ┌──────────────┐
-│ Frontend │     │Internet       │     │User          │
-│          │────►│Identity       │────►│Management    │
-│          │◄────│               │◄────│Canister      │
-└──────────┘     └───────────────┘     └──────────────┘
-```
-
-1. Frontend redirects user to Internet Identity
-2. User authenticates with Internet Identity
-3. Internet Identity returns authentication principal
-4. User Management canister verifies the principal
-5. User Management returns user profile to frontend
-
-### Project Creation Flow
-
-```
-┌──────────┐     ┌───────────────┐     ┌──────────────┐
-│ Frontend │────►│Project        │────►│Website       │
-│          │◄────│Management     │◄────│Storage       │
-└──────────┘     └───────────────┘     └──────────────┘
-```
-
-1. Frontend sends project creation request to Project Management
-2. Project Management creates project and initial version
-3. Project Management sets up access control with Website Storage
-4. Website Storage confirms access configuration
-5. Project creation confirmation returned to frontend
-
-### Asset Upload Flow
-
-```
-┌──────────┐     ┌───────────────┐     ┌──────────────┐
-│ Frontend │────►│Website        │────►│Project       │
-│          │     │Storage        │────►│Management    │
-│          │     │               │◄────│              │
-│          │◄────│               │     └──────────────┘
-└──────────┘     └───────────────┘
-```
-
-1. Frontend sends asset metadata to Website Storage
-2. Website Storage verifies project access with Project Management
-3. Website Storage sends upload approval to frontend
-4. Frontend uploads asset chunks to Website Storage
-5. Website Storage confirms successful upload
-
-### Website Rendering Flow
-
-```
-┌──────────┐     ┌───────────────┐     ┌──────────────┐
-│ Browser  │────►│Website        │────►│Project       │
-│          │     │Renderer       │────►│Management    │
-│          │     │               │◄────│              │
-│          │     │               │     └──────────────┘
-│          │     │               │     ┌──────────────┐
-│          │     │               │────►│Website       │
-│          │     │               │◄────│Storage       │
-│          │◄────│               │     │              │
-└──────────┘     └───────────────┘     └──────────────┘
-```
-
-1. Browser sends HTTP request to Website Renderer
-2. Website Renderer identifies project from URL
-3. Website Renderer verifies project status with Project Management
-4. Website Renderer requests required assets from Website Storage
-5. Website Storage returns asset data to Website Renderer
-6. Website Renderer assembles HTTP response
-7. Browser receives rendered website
-
-## Storage Architecture
-
-The Lessly platform uses a chunked storage architecture to efficiently manage website assets:
-
-```
-┌───────────────────────────┐
-│      Asset Metadata       │
-│ ┌─────────────────────┐   │
-│ │ ID: example-asset   │   │
-│ │ Project: project-id │   │
-│ │ Size: 5MB           │   │
-│ │ Content-Type: image │   │
-│ └─────────────────────┘   │
-└───────────┬───────────────┘
-            │
-            ▼
-┌───────────────────────────┐
-│     Chunked Storage       │
-│ ┌─────────┐ ┌─────────┐   │
-│ │Chunk 0  │ │Chunk 1  │   │
-│ │(2MB)    │ │(2MB)    │   │
-│ └─────────┘ └─────────┘   │
-│ ┌─────────┐              │
-│ │Chunk 2  │              │
-│ │(1MB)    │              │
-│ └─────────┘              │
-└───────────────────────────┘
-```
-
-### Chunking Strategy:
-1. Assets are split into chunks of approximately 2MB
-2. Each chunk is stored with an index and asset ID reference
-3. Chunks can be retrieved independently for streaming
-4. Metadata includes information about total size and number of chunks
-
-## Versioning System
-
-Lessly's versioning system keeps track of website revisions:
-
-```
-┌─────────────────────────┐
-│      Project            │
-│  ┌─────────────────┐    │
-│  │ID: project-1    │    │
-│  │Current: v3      │    │
-│  └─────────────────┘    │
-└──────────┬──────────────┘
-           │
-           ▼
-┌──────────────────────────────────────────────────┐
-│                  Versions                        │
-│  ┌─────────┐    ┌─────────┐    ┌─────────┐      │
-│  │Version 1│    │Version 2│    │Version 3│      │
-│  │Initial  │    │Updated  │    │Current  │      │
-│  └────┬────┘    └────┬────┘    └────┬────┘      │
-└───────┼───────────────┼───────────────┼─────────┘
-        │               │               │
-        ▼               ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│Assets v1     │ │Assets v2     │ │Assets v3     │
-│              │ │              │ │              │
-│- index.html  │ │- index.html  │ │- index.html  │
-│- style.css   │ │- style.css   │ │- style.css   │
-│- script.js   │ │- script.js   │ │- script.js   │
-│- logo.png    │ │- logo.png    │ │- logo.png    │
-│              │ │- banner.jpg  │ │- banner.jpg  │
-│              │ │              │ │- new-form.js │
-└──────────────┘ └──────────────┘ └──────────────┘
-```
-
-### Version Control Features:
-1. Each version has a unique identifier
-2. Assets are tagged with version ID for association
-3. Project tracks current active version
-4. Historical versions remain accessible
-5. Versions can be created, viewed, and rolled back
+### Performance Optimizations
+- Query functions for fast data retrieval
+- Efficient data structures (HashMap) for O(1) access
+- Minimal state mutations for better performance
 
 ## Deployment Architecture
 
-The Lessly platform's deployment architecture on the Internet Computer:
+### Local Development
+- dfx for local Internet Computer replica
+- Vite dev server for frontend development
+- Hot reloading and fast refresh for development
 
-```
-┌──────────────────────────────────────┐
-│          Internet Computer           │
-│                                      │
-│  ┌───────────┐      ┌───────────┐   │
-│  │Replica 1  │      │Replica 2  │   │
-│  │           │      │           │   │
-│  │ Lessly    │      │ Lessly    │   │
-│  │ Canisters │      │ Canisters │   │
-│  └───────────┘      └───────────┘   │
-│         ▲                  ▲        │
-└─────────┼──────────────────┼────────┘
-          │                  │
-      ┌───┴──────────────────┴───┐
-      │                          │
-      │         Internet         │
-      │                          │
-      └──────────┬───────────────┘
-                 │
-                 ▼
-      ┌───────────────────┐
-      │  User's Browser   │
-      └───────────────────┘
-```
+### Production Deployment
+- Canisters deployed to Internet Computer mainnet
+- Frontend served from IC with HTTP gateway
+- Cycles management for canister operation costs
 
-### Deployment Characteristics:
-1. Canisters are deployed across the Internet Computer network
-2. Replicated execution ensures availability and fault tolerance
-3. The boundary node network provides HTTP gateway for public access
-4. Users access websites directly through canister URLs or custom domains
-5. All website assets are served directly from the IC network
+## Future Extensibility
 
-## Security Model
-
-Lessly implements a multi-layered security model:
-
-```
-┌───────────────────────────────────────────────┐
-│                Authentication                 │
-│  ┌───────────────────────────────────┐        │
-│  │        Internet Identity          │        │
-│  └───────────────────────────────────┘        │
-└───────────────────────┬───────────────────────┘
-                        │
-┌───────────────────────▼───────────────────────┐
-│                Authorization                  │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
-│  │  Owner    │  │Collaborator│  │  Viewer  │  │
-│  │Permissions│  │Permissions │  │Permissions│  │
-│  └───────────┘  └───────────┘  └───────────┘  │
-└───────────────────────┬───────────────────────┘
-                        │
-┌───────────────────────▼───────────────────────┐
-│              Access Control                   │
-│  ┌───────────────────────────────────┐        │
-│  │  Canister-level Guard Functions   │        │
-│  └───────────────────────────────────┘        │
-└───────────────────────┬───────────────────────┘
-                        │
-┌───────────────────────▼───────────────────────┐
-│              Data Security                    │
-│  ┌───────────────────────────────────┐        │
-│  │    Orthogonal Persistence         │        │
-│  └───────────────────────────────────┘        │
-└───────────────────────────────────────────────┘
-```
-
-### Security Layers:
-1. **Authentication**: Internet Identity provides secure, anonymous authentication
-2. **Authorization**: Role-based access control for project operations
-3. **Access Control**: Canister-level guards validate all incoming calls
-4. **Data Security**: Orthogonal persistence ensures data integrity
-
-## Scaling Strategy
-
-Lessly's architecture is designed to scale horizontally:
-
-```
-┌────────────────────────────────┐
-│        User Management         │
-│  ┌──────────┐    ┌──────────┐  │
-│  │ Primary  │    │Secondary │  │
-│  │ Canister │    │Canister  │  │
-│  └──────────┘    └──────────┘  │
-└────────────────────────────────┘
-
-┌────────────────────────────────┐
-│       Project Management       │
-│  ┌──────────┐    ┌──────────┐  │
-│  │ Primary  │    │Secondary │  │
-│  │ Canister │    │Canister  │  │
-│  └──────────┘    └──────────┘  │
-└────────────────────────────────┘
-
-┌────────────────────────────────┐
-│        Website Storage         │
-│  ┌──────────┐    ┌──────────┐  │
-│  │Storage 1 │    │Storage 2 │  │
-│  │Canister  │    │Canister  │  │
-│  └──────────┘    └──────────┘  │
-│  ┌──────────┐    ┌──────────┐  │
-│  │Storage 3 │    │Storage 4 │  │
-│  │Canister  │    │Canister  │  │
-│  └──────────┘    └──────────┘  │
-└────────────────────────────────┘
-
-┌────────────────────────────────┐
-│        Website Renderer        │
-│  ┌──────────┐    ┌──────────┐  │
-│  │Renderer 1│    │Renderer 2│  │
-│  │Canister  │    │Canister  │  │
-│  └──────────┘    └──────────┘  │
-└────────────────────────────────┘
-```
-
-### Scaling Approaches:
-1. **User Management**: Sharded by user ID ranges
-2. **Project Management**: Sharded by project ID
-3. **Website Storage**: Multiple storage canisters for different projects
-4. **Website Renderer**: Load-balanced renderers for high-traffic websites
-
-## Development and Deployment Workflow
-
-```
-┌────────────┐     ┌────────────┐     ┌────────────┐     ┌────────────┐
-│  Develop   │────►│   Test     │────►│  Deploy    │────►│  Monitor   │
-│  Code      │     │  Locally   │     │ to Mainnet │     │ & Update   │
-└────────────┘     └────────────┘     └────────────┘     └────────────┘
-```
-
-1. **Development**: 
-   - Develop Motoko actors for each canister
-   - Configure inter-canister communication
-   - Implement frontend components
-
-2. **Testing**:
-   - Local deployment using dfx
-   - Unit and integration testing
-   - Simulated user workflows
-
-3. **Deployment**:
-   - Staged deployment to IC mainnet
-   - Canister upgrades with data preservation
-   - Frontend deployment to asset canister
-
-4. **Monitoring**:
-   - Performance monitoring
-   - Error tracking
-   - Usage analytics
+The architecture is designed for future enhancements:
+- Additional canisters can be added for new features
+- Type system supports extension without breaking changes
+- Modular frontend architecture allows component reuse
+- Stable storage ensures data migration capabilities
