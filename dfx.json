@@ -31,7 +31,14 @@
           }
         }
       },
-
+      "frontend": {
+        "dependencies": ["user"],
+        "frontend": {
+          "entrypoint": "frontend/index.html"
+        },
+        "source": ["frontend/dist"],
+        "type": "assets"
+      },
 
       "internet_identity": {
         "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
@@ -45,6 +52,7 @@
         "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
       }
     },
+
     "output_env_file": ".env",
     "defaults": {
       "build": {
