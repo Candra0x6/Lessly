@@ -126,7 +126,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Contact
 
-Project Link: [https://github.com/yourusername/lessly](https://github.com/yourusername/lessly)
+Project Link: [https://github.com/Candra0x6/Lessly.git]([https://github.com/Candra0x6/Lessly.git](https://github.com/Candra0x6/Lessly.git)
 
 ---
 
